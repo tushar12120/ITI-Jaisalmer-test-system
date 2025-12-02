@@ -13,29 +13,17 @@ const App = {
     },
 
     saveTest: async (test) => {
-        // If test has ID, update it, else insert new
-        if (test.id) {
-            const { data, error } = await supabase
-                .from('tests')
-                .update(test)
-                .eq('id', test.id)
-                .select();
+        // Use upsert to handle both insert and update
+        const { data, error } = await supabase
+            .from('tests')
+            .upsert(test, { onConflict: 'id' })
+            .select();
 
-            if (error) console.error('Error updating test:', error);
-            return data ? data[0] : null;
-        } else {
-            // Generate ID since DB doesn't have default
-            const newId = crypto.randomUUID();
-            const testData = { ...test, id: newId };
-
-            const { data, error } = await supabase
-                .from('tests')
-                .insert([testData])
-                .select();
-
-            if (error) console.error('Error saving test:', error);
-            return data ? data[0] : null;
+        if (error) {
+            console.error('Error saving test:', error);
+            throw error; // Throw error so it can be caught
         }
+        return data ? data[0] : null;
     },
 
     getActiveTestId: async () => {
