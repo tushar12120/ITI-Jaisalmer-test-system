@@ -174,31 +174,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Check if this test has previous results
-        const allResults = await App.getResults();
-        const previousResults = allResults.filter(r => r.test_id === currentTest.id);
+        // ✅ IMPORTANT: Create a NEW test instance with unique ID each time
+        // This allows same test to be reused WITHOUT old student data
 
-        if (previousResults.length > 0) {
-            const confirmMsg = `⚠️ WARNING: This test "${currentTest.name}" has ${previousResults.length} previous result(s) from earlier sessions.\n\n` +
-                `Students who already took this test will see "You have already taken this test" and cannot retake it.\n\n` +
-                `RECOMMENDATION:\n` +
-                `1. Change the test name (e.g., "${currentTest.name} - Session 2")\n` +
-                `2. Click "Save Test" to create a new test\n` +
-                `3. Then start the new test\n\n` +
-                `OR\n\n` +
-                `Continue with same test name (only NEW students can take it)\n\n` +
-                `Do you want to continue starting this test anyway?`;
+        const timestamp = Date.now();
+        const originalTestName = currentTest.name.replace(/ - Session \d+$/i, ''); // Remove old session suffix
 
-            if (!confirm(confirmMsg)) {
-                return;
-            }
-        }
+        // Generate unique instance ID and name
+        const newInstanceId = `${currentTest.id}_instance_${timestamp}`;
+        const newInstanceName = `${originalTestName} - Session ${new Date().toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`;
 
-        // Update test status to 'active'
-        await App.saveTest({ ...currentTest, status: 'active', is_active: true });
-        await App.setActiveTestId(currentTest.id);
+        // Create fresh test instance
+        const testInstance = {
+            id: newInstanceId,
+            name: newInstanceName,
+            questions: currentTest.questions, // Copy questions from template
+            status: 'active',
+            is_active: true,
+            original_test_id: currentTest.id, // Track which template was used
+            created_at: new Date().toISOString()
+        };
+
+        // Save new instance and set as active
+        await App.saveTest(testInstance);
+        await App.setActiveTestId(newInstanceId);
+
+        // Update current test to the new instance
+        currentTest = testInstance;
+
         updateStatusDisplay();
         loadSavedTests();
+
+        alert(`✅ Test started successfully!\n\nTest Name: ${newInstanceName}\n\nThis is a FRESH session - no old student data will appear.`);
     });
 
     stopTestBtn.addEventListener('click', async () => {
