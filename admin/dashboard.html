@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ITI Jaisalmer</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <img src="../assets/images/logo.png" alt="ITI Jaisalmer Logo" class="logo">
+            <h1 class="site-title">Admin Dashboard</h1>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" style="width: auto;">Logout</button>
+    </header>
+
+    <main>
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tests">Test Management</button>
+            <button class="tab-btn" data-tab="questionbank">Question Bank</button>
+            <button class="tab-btn" data-tab="live">Live Test</button>
+            <button class="tab-btn" data-tab="history">Previous Tests</button>
+            <button class="tab-btn" data-tab="students">Student Management</button>
+        </div>
+
+        <!-- Tests Tab Content -->
+        <div id="tests" class="tab-content active">
+            <div class="grid-2" style="grid-template-columns: 1fr 2fr; align-items: start;">
+                <!-- Control Panel -->
+                <div class="card">
+                    <h2 class="card-title">Test Controls</h2>
+                    <div id="activeTestStatus" class="alert alert-error text-center">
+                        No Active Test
+                    </div>
+                    <button id="startTestBtn" class="btn btn-primary mb-4">Start Test</button>
+                    <button id="stopTestBtn" class="btn btn-danger mb-4"
+                        style="background-color: var(--danger-color); color: white; display: none;">Stop Test</button>
+
+                    <hr class="mb-4" style="border-color: var(--border-color);">
+
+                    <h3 class="card-title" style="font-size: 1rem;">Saved Tests</h3>
+                    <ul id="savedTestsList" style="list-style: none;">
+                        <!-- List of tests will go here -->
+                    </ul>
+                </div>
+
+                <!-- Test Editor -->
+                <div class="card" style="max-width: 100%;">
+                    <h2 class="card-title">Create / Edit Test</h2>
+                    <div class="form-group">
+                        <label class="form-label">Test Name</label>
+                        <input type="text" id="testName" class="form-input" placeholder="e.g., COPA Monthly Test 1">
+                    </div>
+
+                    <div id="questionsContainer">
+                        <!-- Questions will be added here -->
+                    </div>
+
+                    <button id="addQuestionBtn" class="btn btn-secondary mb-4">+ Add Question</button>
+                    <button id="saveTestBtn" class="btn btn-primary">Save Test</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Bank Tab Content -->
+        <div id="questionbank" class="tab-content">
+            <div class="card" style="max-width: 100%;">
+                <h2 class="card-title">COPA Question Bank (1200+ Questions)</h2>
+
+                <!-- Filters Section -->
+                <div
+                    style="background: #f8f9fa; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                    <div class="grid-4" style="gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Category</label>
+                            <select id="qbCategory" class="form-input">
+                                <option value="">All Categories</option>
+                                <option value="Theory">Theory</option>
+                                <option value="Practical">Practical</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Sub-Topic</label>
+                            <select id="qbSubTopic" class="form-input">
+                                <option value="">All Topics</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Difficulty</label>
+                            <select id="qbDifficulty" class="form-input">
+                                <option value="">All Levels</option>
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Search</label>
+                            <input type="text" id="qbSearch" class="form-input" placeholder="Search questions...">
+                        </div>
+                    </div>
+                    <button id="qbClearFilters" class="btn btn-secondary btn-sm">Clear Filters</button>
+                </div>
+
+                <!-- Bulk Selection Buttons -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <button id="qbSelectAll" class="btn btn-secondary btn-sm">Select All (Page)</button>
+                    <button id="qbSelectRandom10" class="btn btn-secondary btn-sm">Random 10</button>
+                    <button id="qbSelectRandom20" class="btn btn-secondary btn-sm">Random 20</button>
+                    <button id="qbClearSelection" class="btn btn-secondary btn-sm">Clear Selection</button>
+                    <div
+                        style="margin-left: auto; padding: 0.5rem 1rem; background: #e0f2fe; border-radius: var(--radius-sm); font-weight: bold;">
+                        <span id="qbSelectedCount">0</span> questions selected
+                    </div>
+                </div>
+
+                <!-- Questions Table -->
+                <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">
+                                    <input type="checkbox" id="qbSelectAllCheckbox">
+                                </th>
+                                <th style="width: 80px;">ID</th>
+                                <th>Question</th>
+                                <th style="width: 150px;">Topic</th>
+                                <th style="width: 100px;">Difficulty</th>
+                            </tr>
+                        </thead>
+                        <tbody id="qbTableBody">
+                            <!-- Questions will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                    <div>
+                        <label>Items per page: </label>
+                        <select id="qbItemsPerPage" class="form-input"
+                            style="display: inline-block; width: auto; padding: 0.25rem;">
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button id="qbPrevPage" class="btn btn-secondary btn-sm">Previous</button>
+                        <span id="qbPageInfo">Page 1 of 1</span>
+                        <button id="qbNextPage" class="btn btn-secondary btn-sm">Next</button>
+                    </div>
+                </div>
+
+                <!-- Insert Button -->
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid var(--border-color);">
+                    <button id="qbInsertSelected" class="btn btn-primary"
+                        style="font-size: 1.1rem; padding: 0.75rem 2rem;">
+                        Insert Selected Questions into Test
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Test Tab Content -->
+        <div id="live" class="tab-content">
+            <div class="card" style="max-width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 class="card-title" style="margin-bottom: 0;">Live Monitoring</h2>
+                    <button id="refreshLiveBtn" class="btn btn-secondary btn-sm">Refresh</button>
+                </div>
+
+                <!-- Live Summary Stats -->
+                <div class="grid-4" style="gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="stat-card"
+                        style="background: #e0f2fe; padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+                        <h4 style="margin: 0; color: #0369a1; font-size: 0.875rem;">Active Test</h4>
+                        <p id="liveTestName"
+                            style="margin: 0.5rem 0 0; font-size: 1.25rem; font-weight: bold; color: #0c4a6e;">-</p>
+                    </div>
+                    <div class="stat-card"
+                        style="background: #f3e8ff; padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+                        <h4 style="margin: 0; color: #7e22ce; font-size: 0.875rem;">Total Joined</h4>
+                        <p id="liveJoinedCount"
+                            style="margin: 0.5rem 0 0; font-size: 1.5rem; font-weight: bold; color: #581c87;">0</p>
+                    </div>
+                    <div class="stat-card"
+                        style="background: #dcfce7; padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+                        <h4 style="margin: 0; color: #15803d; font-size: 0.875rem;">Completed</h4>
+                        <p id="liveCompletedCount"
+                            style="margin: 0.5rem 0 0; font-size: 1.5rem; font-weight: bold; color: #14532d;">0</p>
+                    </div>
+                    <div class="stat-card"
+                        style="background: #ffedd5; padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+                        <h4 style="margin: 0; color: #c2410c; font-size: 0.875rem;">In Progress</h4>
+                        <p id="liveActiveCount"
+                            style="margin: 0.5rem 0 0; font-size: 1.5rem; font-weight: bold; color: #7c2d12;">0</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Status</th>
+                                <th>Cheating Attempts</th>
+                                <th>Score</th>
+                                <th>Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="liveTableBody">
+                            <!-- Live data will be here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Tests Tab Content -->
+        <div id="history" class="tab-content">
+            <div class="card" style="max-width: 100%;">
+                <h2 class="card-title">Previous Tests History</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test Name</th>
+                                <th>Date Created</th>
+                                <th>Total Students</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTestsListBody">
+                            <!-- List of past tests -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Details Modal -->
+        <div id="historyModal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+            <div class="card"
+                style="width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative;">
+                <button id="closeHistoryModal"
+                    style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <h2 id="historyModalTitle" class="card-title">Test Results</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                                <th>Cheating</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyModalBody">
+                            <!-- Detailed results -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wrong Answers Modal -->
+        <div id="wrongAnswersModal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center;">
+            <div class="card"
+                style="width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; position: relative;">
+                <button id="closeWrongAnswersModal"
+                    style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <h2 id="wrongAnswersModalTitle" class="card-title">Wrong Answers Analysis</h2>
+                <div id="wrongAnswersContent" style="margin-top: 1rem;">
+                    <!-- Wrong answers will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Tab Content -->
+        <div id="students" class="tab-content">
+            <div class="card" style="max-width: 100%;">
+                <h2 class="card-title">Student Management</h2>
+                <div class="grid-2" style="align-items: start;">
+                    <div>
+                        <h3 class="card-title" style="font-size: 1rem;">Register New Student</h3>
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="regStudentName" class="form-input" placeholder="Enter student name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Trade</label>
+                            <input type="text" id="regStudentTrade" class="form-input" placeholder="e.g., COPA">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" id="regStudentDob" class="form-input">
+                        </div>
+                        <button id="registerStudentBtn" class="btn btn-primary">Register Student</button>
+                    </div>
+                    <div>
+                        <h3 class="card-title" style="font-size: 1rem;">Registered Students</h3>
+                        <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Trade</th>
+                                        <th>DOB</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTableBody">
+                                    <!-- Students will be listed here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Question Template (Hidden) -->
+    <template id="questionTemplate">
+        <div class="question-block"
+            style="background: var(--background-color); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; border: 1px solid var(--border-color);">
+            <div class="form-group">
+                <label class="form-label">Question Text</label>
+                <input type="text" class="form-input question-text" placeholder="Enter question">
+            </div>
+            <div class="grid-2" style="gap: 1rem;">
+                <div class="form-group">
+                    <input type="text" class="form-input option-a" placeholder="Option A">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input option-b" placeholder="Option B">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input option-c" placeholder="Option C">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input option-d" placeholder="Option D">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Correct Answer</label>
+                <select class="form-input correct-answer">
+                    <option value="A">Option A</option>
+                    <option value="B">Option B</option>
+                    <option value="C">Option C</option>
+                    <option value="D">Option D</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary remove-question"
+                style="color: var(--danger-color); border-color: var(--danger-color);">Remove</button>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/admin.js"></script>
+    <script src="../assets/js/questionbank.js"></script>
+</body>
+
+</html>

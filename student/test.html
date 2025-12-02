@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - ITI Jaisalmer</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* Security: Prevent text selection */
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .question-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--background-color);
+        }
+
+        .option-input {
+            margin-right: 1rem;
+        }
+
+        .option-input:checked+span {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .option-label:has(.option-input:checked) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        #resultOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .result-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body oncopy="return false" oncut="return false" onpaste="return false" oncontextmenu="return false">
+    <header>
+        <div class="header-content">
+            <img src="../assets/images/logo.png" alt="ITI Jaisalmer Logo" class="logo">
+            <div>
+                <h1 class="site-title">Industrial Training Institute Jaisalmer</h1>
+                <p id="studentInfoDisplay" style="font-size: 0.875rem; color: var(--text-light);"></p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div style="max-width: 800px; width: 100%;">
+            <div class="card mb-4">
+                <h2 id="testTitle" class="card-title">Loading Test...</h2>
+                <div id="timer" style="text-align: right; font-weight: bold; color: var(--danger-color);"></div>
+            </div>
+
+            <form id="testForm">
+                <div id="questionsList">
+                    <!-- Questions will be rendered here -->
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;">Submit Test</button>
+            </form>
+        </div>
+    </main>
+
+    <div id="resultOverlay">
+        <div class="result-card">
+            <h2 class="card-title">Test Completed!</h2>
+            <div style="font-size: 4rem; font-weight: 700; color: var(--primary-color); margin: 1rem 0;">
+                <span id="scoreDisplay">0</span>%
+            </div>
+            <p id="scoreDetails" class="mb-4" style="color: var(--text-light);"></p>
+            <a href="../index.html" class="btn btn-primary">Back to Home</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/student.js"></script>
+</body>
+
+</html>

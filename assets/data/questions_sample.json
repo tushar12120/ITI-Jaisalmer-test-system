@@ -1,0 +1,178 @@
+{
+  "metadata": {
+    "title": "COPA Question Bank - Complete",
+    "totalQuestions": 1200,
+    "categories": ["Theory", "Practical"],
+    "lastUpdated": "2025-12-01"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "category": "Theory",
+      "subTopic": "Introduction of Computer Components",
+      "question": "What is the full form of CPU?",
+      "options": {
+        "A": "Central Processing Unit",
+        "B": "Computer Personal Unit",
+        "C": "Central Program Utility",
+        "D": "Computer Processing Unit"
+      },
+      "correctAnswer": "A",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 2,
+      "category": "Theory",
+      "subTopic": "Introduction of Computer Components",
+      "question": "Which of the following is an input device?",
+      "options": {
+        "A": "Monitor",
+        "B": "Printer",
+        "C": "Keyboard",
+        "D": "Speaker"
+      },
+      "correctAnswer": "C",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 3,
+      "category": "Theory",
+      "subTopic": "Introduction of Computer Components",
+      "question": "What is the brain of the computer?",
+      "options": {
+        "A": "RAM",
+        "B": "CPU",
+        "C": "ROM",
+        "D": "Hard Disk"
+      },
+      "correctAnswer": "B",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 4,
+      "category": "Theory",
+      "subTopic": "Introduction of the Windows Operating System",
+      "question": "What is an operating system?",
+      "options": {
+        "A": "Application software",
+        "B": "System software managing hardware",
+        "C": "Utility software",
+        "D": "Programming language"
+      },
+      "correctAnswer": "B",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 5,
+      "category": "Theory",
+      "subTopic": "Introduction of the Windows Operating System",
+      "question": "Which is not an operating system?",
+      "options": {
+        "A": "Windows",
+        "B": "Linux",
+        "C": "MS Office",
+        "D": "macOS"
+      },
+      "correctAnswer": "C",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 6,
+      "category": "Theory",
+      "subTopic": "Word Processing Software",
+      "question": "Which software is used for word processing?",
+      "options": {
+        "A": "Excel",
+        "B": "Word",
+        "C": "PowerPoint",
+        "D": "Access"
+      },
+      "correctAnswer": "B",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 7,
+      "category": "Theory",
+      "subTopic": "Word Processing Software",
+      "question": "What is the file extension of Word document?",
+      "options": {
+        "A": ".xls",
+        "B": ".docx",
+        "C": ".pptx",
+        "D": ".txt"
+      },
+      "correctAnswer": "B",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 8,
+      "category": "Theory",
+      "subTopic": "Spreadsheet Application",
+      "question": "What is Excel used for?",
+      "options": {
+        "A": "Word processing",
+        "B": "Spreadsheet calculations",
+        "C": "Presentations",
+        "D": "Database"
+      },
+      "correctAnswer": "B",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 9,
+      "category": "Theory",
+      "subTopic": "Spreadsheet Application",
+      "question": "What is the default file extension of Excel?",
+      "options": {
+        "A": ".doc",
+        "B": ".xlsx",
+        "C": ".ppt",
+        "D": ".pdf"
+      },
+      "correctAnswer": "B",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 10,
+      "category": "Theory",
+      "subTopic": "Database Management Systems",
+      "question": "Which software manages databases?",
+      "options": {
+        "A": "Word",
+        "B": "Excel",
+        "C": "PowerPoint",
+        "D": "Access"
+      },
+      "correctAnswer": "D",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 11,
+      "category": "Practical",
+      "subTopic": "Use of Windows Operating System",
+      "question": "How to open Task Manager in Windows?",
+      "options": {
+        "A": "Ctrl+Alt+Del",
+        "B": "Ctrl+Shift+Esc",
+        "C": "Win+R",
+        "D": "Alt+F4"
+      },
+      "correctAnswer": "B",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 12,
+      "category": "Practical",
+      "subTopic": "Using Word Processing Software",
+      "question": "How to make text bold in Word?",
+      "options": {
+        "A": "Ctrl+B",
+        "B": "Ctrl+I",
+        "C": "Ctrl+U",
+        "D": "Ctrl+S"
+      },
+      "correctAnswer": "A",
+      "difficulty": "Easy"
+    }
+  ]
+}

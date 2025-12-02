@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Training Institute Jaisalmer - Test System</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <img src="assets/images/logo.png" alt="ITI Jaisalmer Logo" class="logo">
+            <h1 class="site-title">Industrial Training Institute Jaisalmer</h1>
+        </div>
+        <a href="admin/login.html" class="btn btn-secondary" style="width: auto; margin-left: auto;">Admin Login</a>
+    </header>
+
+    <main>
+        <div class="card">
+            <h2 class="card-title">Student Login</h2>
+            <div id="noActiveTestMsg" class="alert alert-error" style="display: none;">
+                No active test at the moment. Please wait for the instructor.
+            </div>
+
+            <form id="studentLoginForm">
+                <div class="form-group">
+                    <label class="form-label">Student ID</label>
+                    <input type="text" id="studentId" class="form-input" placeholder="Enter 7-digit Student ID" required
+                        pattern="\d{7}" title="Please enter a valid 7-digit Student ID">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" id="dob" class="form-input" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Start Test</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-config.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const form = document.getElementById('studentLoginForm');
+            const noTestMsg = document.getElementById('noActiveTestMsg');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            // Check for active test
+            const activeTest = await App.getActiveTest();
+            if (!activeTest) {
+                noTestMsg.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+                submitBtn.style.cursor = 'not-allowed';
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!activeTest) return;
+
+                const id = document.getElementById('studentId').value;
+                const dob = document.getElementById('dob').value;
+
+                const student = await App.validateStudent(id, dob);
+
+                if (student) {
+                    // Save student info to session storage
+                    sessionStorage.setItem('iti_student_id', student.id);
+                    sessionStorage.setItem('iti_student_name', student.name);
+                    sessionStorage.setItem('iti_student_trade', student.trade);
+                    window.location.href = 'student/test.html';
+                } else {
+                    alert('Invalid Student ID or Date of Birth. Please contact Admin.');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

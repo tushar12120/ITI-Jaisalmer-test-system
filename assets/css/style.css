@@ -1,0 +1,699 @@
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #475569;
+    --background-color: #f8fafc;
+    --surface-color: #ffffff;
+    --text-color: #1e293b;
+    --text-light: #64748b;
+    --border-color: #e2e8f0;
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.logo {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.site-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Main Layout */
+main {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cards */
+.card {
+    background-color: var(--surface-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    text-align: center;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border: none;
+    text-decoration: none;
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--background-color);
+}
+
+/* Utilities */
+.text-center {
+    text-align: center;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    width: 100%;
+}
+
+/* Alerts */
+.alert {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: var(--primary-color);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-success {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* Enhanced Tables */
+.table-container {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+th {
+    background-color: var(--background-color);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: #f8fafc;
+}
+
+/* Action Buttons in Table */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.alert-success {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.radius-sm {
+    border-radius: 0.25rem;
+}
+
+/* Question Cards (Student Test) */
+.question-card {
+    background-color: var(--surface-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.option-label:hover {
+    background-color: var(--background-color);
+    border-color: var(--primary-color);
+}
+
+.option-input {
+    margin-right: 0.75rem;
+    cursor: pointer;
+}
+
+/* ========== MOBILE RESPONSIVE STYLES ========== */
+
+/* Tablets and below (768px) */
+@media (max-width: 768px) {
+
+    /* Header */
+    header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .logo {
+        height: 40px;
+    }
+
+    .site-title {
+        font-size: 1.125rem;
+    }
+
+    /* Main Content */
+    main {
+        padding: 1rem;
+    }
+
+    /* Cards */
+    .card {
+        padding: 1rem;
+    }
+
+    .card-title {
+        font-size: 1.125rem;
+    }
+
+    /* Grids */
+    .grid-2 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    /* Tabs */
+    .tabs {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        overflow-x: auto;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    /* Tables - Horizontal Scroll */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+        font-size: 0.8125rem;
+    }
+
+    th,
+    td {
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9375rem;
+    }
+
+    .btn-sm {
+        padding: 0.375rem 0.625rem;
+        font-size: 0.6875rem;
+    }
+
+    /* Form Inputs */
+    .form-input {
+        padding: 0.625rem;
+        font-size: 0.9375rem;
+    }
+
+    /* Modals - Full Width on Mobile */
+    #historyModal>.card,
+    #wrongAnswersModal>.card {
+        width: 95% !important;
+        max-width: 95% !important;
+        max-height: 85vh !important;
+    }
+
+    /* Question Cards */
+    .question-card {
+        padding: 1rem;
+    }
+
+    .option-label {
+        padding: 0.625rem;
+        font-size: 0.9375rem;
+    }
+
+    /* Stat Cards */
+    .stat-card h4 {
+        font-size: 0.75rem !important;
+    }
+
+    .stat-card p {
+        font-size: 1.125rem !important;
+    }
+
+    /* Reduce badge sizes */
+    .badge {
+        font-size: 0.625rem;
+        padding: 0.1875rem 0.5rem;
+    }
+}
+
+/* Mobile Phones (480px and below) */
+@media (max-width: 480px) {
+
+    /* Header */
+    .logo {
+        height: 32px;
+    }
+
+    .site-title {
+        font-size: 1rem;
+    }
+
+    header button {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+
+    /* Main  */
+    main {
+        padding: 0.75rem;
+    }
+
+    /* Cards */
+    .card {
+        padding: 0.75rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+    }
+
+    /* Grid - Single Column */
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tabs - Scrollable */
+    .tabs {
+        gap: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    /* Tables - Better Touch Targets */
+    th,
+    td {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    table {
+        min-width: 500px;
+    }
+
+    /* Buttons - Larger Touch Targets */
+    .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    /* Form Inputs - Better Touch Targets */
+    .form-input {
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .form-label {
+        font-size: 0.8125rem;
+    }
+
+    /* Modals */
+    #historyModal>.card,
+    #wrongAnswersModal>.card {
+        width: 98% !important;
+        max-width: 98% !important;
+        padding: 1rem !important;
+    }
+
+    #closeHistoryModal,
+    #closeWrongAnswersModal {
+        font-size: 1.75rem !important;
+        padding: 0.5rem !important;
+    }
+
+    /* Question Cards - Compact */
+    .question-card {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .options {
+        gap: 0.5rem;
+    }
+
+    .option-label {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    /* Stat Cards - Smaller Text */
+    .stat-card {
+        padding: 0.75rem !important;
+    }
+
+    .stat-card h4 {
+        font-size: 0.6875rem !important;
+    }
+
+    .stat-card p {
+        font-size: 1rem !important;
+    }
+
+    /* Alert Messages */
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    /* Badges */
+    .badge {
+        font-size: 0.5625rem;
+        padding: 0.125rem 0.375rem;
+    }
+
+    /* Wrong Answers Modal Content */
+    #wrongAnswersContent>div {
+        padding: 0.75rem !important;
+    }
+
+    #wrongAnswersContent h3 {
+        font-size: 1rem !important;
+    }
+
+    #wrongAnswersContent h4 {
+        font-size: 0.875rem !important;
+    }
+
+    #wrongAnswersContent p {
+        font-size: 0.875rem !important;
+    }
+}
+
+/* Landscape Mobile (Small Height) */
+@media (max-height: 500px) and (orientation: landscape) {
+    header {
+        padding: 0.5rem 1rem;
+    }
+
+    .logo {
+        height: 32px;
+    }
+
+    .site-title {
+        font-size: 0.9375rem;
+    }
+
+    main {
+        padding: 0.5rem;
+    }
+
+    .card {
+        padding: 0.75rem;
+    }
+
+    .tab-btn {
+        padding: 0.375rem 0.75rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    header button {
+        display: none;
+    }
+
+    .tabs {
+        display: none;
+    }
+
+    .tab-content:not(.active) {
+        display: block !important;
+    }
+
+    .btn {
+        display: none;
+    }
+}

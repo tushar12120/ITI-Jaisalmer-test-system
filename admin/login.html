@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - ITI Jaisalmer</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <img src="../assets/images/logo.png" alt="ITI Jaisalmer Logo" class="logo">
+            <h1 class="site-title">Industrial Training Institute Jaisalmer</h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <h2 class="card-title">Admin Login</h2>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter admin password" required>
+                </div>
+                <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a href="../index.html" class="btn btn-secondary mt-4">Back to Home</a>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            // Simple hardcoded password for prototype
+            if (password === 'admin123') {
+                window.location.href = 'dashboard.html';
+            } else {
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.textContent = 'Invalid password';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>

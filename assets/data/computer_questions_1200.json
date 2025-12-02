@@ -1,0 +1,114 @@
+{
+    "questions": [
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "What is the full form of CPU?",
+            "option_a": "Central Processing Unit",
+            "option_b": "Computer Personal Unit",
+            "option_c": "Central Program Utility",
+            "option_d": "Computer Processing Unit",
+            "correct_answer": "A",
+            "difficulty": "Easy"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "Which of the following is an input device?",
+            "option_a": "Monitor",
+            "option_b": "Printer",
+            "option_c": "Keyboard",
+            "option_d": "Speaker",
+            "correct_answer": "C",
+            "difficulty": "Easy"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "What is the brain of the computer?",
+            "option_a": "RAM",
+            "option_b": "CPU",
+            "option_c": "ROM",
+            "option_d": "Hard Disk",
+            "correct_answer": "B",
+            "difficulty": "Easy"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "Which of the following is not an output device?",
+            "option_a": "Monitor",
+            "option_b": "Printer",
+            "option_c": "Scanner",
+            "option_d": "Speakers",
+            "correct_answer": "C",
+            "difficulty": "Easy"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "1 Byte is equal to how many bits?",
+            "option_a": "4 bits",
+            "option_b": "8 bits",
+            "option_c": "16 bits",
+            "option_d": "32 bits",
+            "correct_answer": "B",
+            "difficulty": "Easy"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "Which generation of computers used Integrated Circuits (ICs)?",
+            "option_a": "First Generation",
+            "option_b": "Second Generation",
+            "option_c": "Third Generation",
+            "option_d": "Fourth Generation",
+            "correct_answer": "C",
+            "difficulty": "Medium"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "What does RAM stand for?",
+            "option_a": "Random Access Memory",
+            "option_b": "Read Access Memory",
+            "option_c": "Rapid Access Memory",
+            "option_d": "Random Active Memory",
+            "correct_answer": "A",
+            "difficulty": "Easy"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "Which of the following is a volatile memory?",
+            "option_a": "ROM",
+            "option_b": "RAM",
+            "option_c": "Hard Disk",
+            "option_d": "SSD",
+            "correct_answer": "B",
+            "difficulty": "Medium"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "What does GUI stand for?",
+            "option_a": "Graphical User Interface",
+            "option_b": "General User Interface",
+            "option_c": "Graphical Universal Interface",
+            "option_d": "General Utility Interface",
+            "correct_answer": "A",
+            "difficulty": "Easy"
+        },
+        {
+            "category": "Theory",
+            "sub_topic": "Computer Fundamentals",
+            "question": "The smallest unit of data in a computer is:",
+            "option_a": "Bit",
+            "option_b": "Byte",
+            "option_c": "Nibble",
+            "option_d": "Kilobyte",
+            "correct_answer": "A",
+            "difficulty": "Easy"
+        }
+    ]
+}
