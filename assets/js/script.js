@@ -33,6 +33,19 @@ const App = {
         return data ? data[0] : null;
     },
 
+    deleteTest: async (testId) => {
+        const { error } = await supabase
+            .from('tests')
+            .delete()
+            .eq('id', testId);
+
+        if (error) {
+            console.error('Error deleting test:', error);
+            throw error;
+        }
+        return true;
+    },
+
     getActiveTestId: async () => {
         // In this simple design, we check for a test with is_active = true
         // Assuming only one test can be active at a time

@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             span.textContent = test.name;
 
             const btnGroup = document.createElement('div');
+            btnGroup.style.display = 'flex';
+            btnGroup.style.gap = '0.5rem';
 
             const selectBtn = document.createElement('button');
             selectBtn.textContent = 'Select';
@@ -49,7 +51,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             selectBtn.style.fontSize = '0.875rem';
             selectBtn.onclick = () => loadTestIntoEditor(test);
 
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.className = 'btn btn-danger';
+            deleteBtn.style.padding = '0.25rem 0.5rem';
+            deleteBtn.style.fontSize = '0.875rem';
+            deleteBtn.style.background = '#dc2626';
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete "${test.name}"?\n\nThis action cannot be undone.`)) {
+                    try {
+                        await App.deleteTest(test.id);
+                        alert('Test deleted successfully!');
+                        loadSavedTests(); // Refresh list
+                    } catch (error) {
+                        alert('Error deleting test: ' + error.message);
+                    }
+                }
+            };
+
             btnGroup.appendChild(selectBtn);
+            btnGroup.appendChild(deleteBtn);
             li.appendChild(span);
             li.appendChild(btnGroup);
             savedTestsList.appendChild(li);

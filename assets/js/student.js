@@ -1,33 +1,96 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // ========== SECURITY FEATURES ==========
 
-    // 1. Request Full-Screen Mode
+    // 1. Request Full-Screen Mode with user interaction
     const requestFullScreen = () => {
         const elem = document.documentElement;
         if (elem.requestFullscreen) {
-            elem.requestFullscreen();
+            return elem.requestFullscreen();
         } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
+            return elem.webkitRequestFullscreen();
         } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
+            return elem.msRequestFullscreen();
         }
+        return Promise.resolve();
     };
 
-    // Request full-screen on page load (after 1 second)
-    setTimeout(() => {
-        requestFullScreen();
-    }, 1000);
+    // Create start overlay
+    const startOverlay = document.createElement('div');
+    startOverlay.id = 'startOverlay';
+    startOverlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; z-index: 2000;';
+    startOverlay.innerHTML = `
+        <div style="background: white; padding: 3rem; border-radius: 12px; text-align: center; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <h2 style="margin-bottom: 1rem; color: #3b82f6;">⚠️ Important Instructions</h2>
+            <div style="text-align: left; margin: 1.5rem 0; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+                <p style="margin-bottom: 0.5rem;">✓ Test will open in <strong>full-screen mode</strong></p>
+                <p style="margin-bottom: 0.5rem;">✓ Do <strong>NOT</strong> press Esc or exit full-screen</p>
+                <p style="margin-bottom: 0.5rem;">✓ Do <strong>NOT</strong> switch tabs or windows</p>
+                <p style="margin-bottom: 0.5rem;">✓ Screenshots are <strong>disabled</strong></p>
+                <p style="margin-bottom: 0.5rem;">⚠️ All violations will be <strong>recorded</strong></p>
+            </div>
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">Click the button below to start your test in full-screen mode</p>
+            <button id="startTestBtn" style="width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: 600; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                🚀 Start Test in Full-Screen
+            </button>
+        </div>
+    `;
+    document.body.appendChild(startOverlay);
 
-    // 2. Detect Full-Screen Exit
+    // Hide test content initially
+    const testContent = document.querySelector('main');
+    if (testContent) testContent.style.display = 'none';
+
+    // Start test button handler
+    document.addEventListener('click', async (e) => {
+        if (e.target.id === 'startTestBtn') {
+            try {
+                await requestFullScreen();
+                startOverlay.style.display = 'none';
+                if (testContent) testContent.style.display = 'flex';
+            } catch (err) {
+                alert('⚠️ Please allow full-screen mode to start the test');
+                console.error('Fullscreen error:', err);
+            }
+        }
+    });
+
+    // Create custom warning modal (better than alert for full-screen re-entry)
+    const warningModal = document.createElement('div');
+    warningModal.id = 'warningModal';
+    warningModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center;';
+    warningModal.innerHTML = `
+        <div style="background: white; padding: 2.5rem; border-radius: 12px; text-align: center; max-width: 450px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <h2 style="color: #dc2626; margin-bottom: 1rem;">Warning!</h2>
+            <p style="color: #4b5563; margin-bottom: 1.5rem; line-height: 1.6;">You exited full-screen mode!<br><br>This has been recorded as a <strong>cheating attempt</strong>.<br><br>Click the button below to return to full-screen and continue your test.</p>
+            <button id="returnFullScreenBtn" style="width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: 600; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                Return to Full-Screen
+            </button>
+        </div>
+    `;
+    document.body.appendChild(warningModal);
+
+    // 2. Detect Full-Screen Exit (only during active test)
+    let testActive = true; // Flag to track if test is ongoing
+
     document.addEventListener('fullscreenchange', () => {
-        if (!document.fullscreenElement) {
-            alert('⚠️ WARNING: You exited full-screen mode!\nThis has been recorded as a cheating attempt.\n\nPlease return to full-screen to continue.');
-            requestFullScreen();
+        if (!document.fullscreenElement && testActive) {
+            // Show custom modal instead of alert
+            warningModal.style.display = 'flex';
+
             // Record as cheating attempt
             if (window.resultId) {
                 window.cheatingAttempts = (window.cheatingAttempts || 0) + 1;
                 App.updateResult(window.resultId, { cheating_attempts: window.cheatingAttempts });
             }
+        }
+    });
+
+    // Return to full-screen button handler
+    document.addEventListener('click', async (e) => {
+        if (e.target.id === 'returnFullScreenBtn') {
+            warningModal.style.display = 'none';
+            await requestFullScreen();
         }
     });
 
@@ -301,15 +364,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         await App.updateResult(window.resultId, updates);
 
+        // Mark test as no longer active (disable cheating detection)
+        testActive = false;
+
+        // Exit full-screen mode (wrapped in try-catch)
+        try {
+            if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        } catch (err) {
+            console.log('Fullscreen exit error (safe to ignore):', err);
+        }
+
         // Disable back button
         history.pushState(null, null, window.location.href);
         window.addEventListener('popstate', function () {
             history.pushState(null, null, window.location.href);
         });
 
-        alert('Test submitted successfully! Thank you for participating.');
+        // Show result overlay instead of alert
+        const resultOverlay = document.getElementById('resultOverlay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const scoreDetails = document.getElementById('scoreDetails');
 
-        sessionStorage.clear();
-        window.location.replace('../index.html');
+        if (resultOverlay && scoreDisplay && scoreDetails) {
+            scoreDisplay.textContent = percentage;
+            scoreDetails.textContent = `You scored ${score} out of ${total} questions correctly.`;
+            resultOverlay.style.display = 'flex';
+        }
+
+        // Auto-redirect after 3 seconds
+        setTimeout(() => {
+            sessionStorage.clear();
+            window.location.replace('../index.html');
+        }, 3000);
     });
 });
