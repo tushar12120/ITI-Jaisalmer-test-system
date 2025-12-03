@@ -54,18 +54,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Create custom warning modal (better than alert for full-screen re-entry)
+    const warningModal = document.createElement('div');
+    warningModal.id = 'warningModal';
+    warningModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center;';
+    warningModal.innerHTML = `
+        <div style="background: white; padding: 2.5rem; border-radius: 12px; text-align: center; max-width: 450px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <h2 style="color: #dc2626; margin-bottom: 1rem;">Warning!</h2>
+            <p style="color: #4b5563; margin-bottom: 1.5rem; line-height: 1.6;">You exited full-screen mode!<br><br>This has been recorded as a <strong>cheating attempt</strong>.<br><br>Click the button below to return to full-screen and continue your test.</p>
+            <button id="returnFullScreenBtn" style="width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: 600; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                Return to Full-Screen
+            </button>
+        </div>
+    `;
+    document.body.appendChild(warningModal);
+
     // 2. Detect Full-Screen Exit (only during active test)
     let testActive = true; // Flag to track if test is ongoing
 
     document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement && testActive) {
-            alert('⚠️ WARNING: You exited full-screen mode!\nThis has been recorded as a cheating attempt.\n\nPlease return to full-screen to continue.');
-            requestFullScreen();
+            // Show custom modal instead of alert
+            warningModal.style.display = 'flex';
+
             // Record as cheating attempt
             if (window.resultId) {
                 window.cheatingAttempts = (window.cheatingAttempts || 0) + 1;
                 App.updateResult(window.resultId, { cheating_attempts: window.cheatingAttempts });
             }
+        }
+    });
+
+    // Return to full-screen button handler
+    document.addEventListener('click', async (e) => {
+        if (e.target.id === 'returnFullScreenBtn') {
+            warningModal.style.display = 'none';
+            await requestFullScreen();
         }
     });
 
