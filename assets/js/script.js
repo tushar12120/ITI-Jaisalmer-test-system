@@ -13,10 +13,11 @@ const App = {
     },
 
     saveTest: async (test) => {
-        // Clean the test object - remove null id for new tests
+        // Clean the test object - generate ID for new tests
         const testToSave = { ...test };
         if (!testToSave.id || testToSave.id === null) {
-            delete testToSave.id; // Let database generate ID for new tests
+            // Generate a simple UUID for new tests
+            testToSave.id = 'test_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
 
         // Use upsert to handle both insert and update
