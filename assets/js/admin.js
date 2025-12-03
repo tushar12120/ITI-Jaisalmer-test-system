@@ -181,8 +181,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Update test status to 'active'
-        await App.saveTest({ ...currentTest, status: 'active', is_active: true });
+        // Generate a unique session ID
+        const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+        // Update test status to 'active' with new session ID
+        await App.saveTest({
+            ...currentTest,
+            status: 'active',
+            is_active: true,
+            active_session_id: sessionId
+        });
+
         await App.setActiveTestId(currentTest.id);
         updateStatusDisplay();
         loadSavedTests();
@@ -317,7 +326,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Get Results
         const results = await App.getResults();
-        const liveResults = results.filter(r => r.test_id === activeId);
+
+        // Filter results by BOTH test_id AND the current active_session_id
+        // If active_session_id is missing (legacy), it might show all or none depending on logic.
+        // Here we enforce session matching if the test has a session ID.
+        let liveResults = [];
+        if (activeTest && activeTest.active_session_id) {
+            liveResults = results.filter(r => r.test_id === activeId && r.session_id === activeTest.active_session_id);
+        } else {
+            // Fallback for legacy behavior or if something went wrong
+            liveResults = results.filter(r => r.test_id === activeId);
+        }
 
         // Calculate Stats
         const totalJoined = liveResults.length;
@@ -327,6 +346,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (liveJoinedCount) liveJoinedCount.textContent = totalJoined;
         if (liveCompletedCount) liveCompletedCount.textContent = completed;
         if (liveActiveCount) liveActiveCount.textContent = inProgress;
+
+        // DEBUG: Show Session Info
+        const debugInfo = document.getElementById('liveDebugInfo') || document.createElement('div');
+        debugInfo.id = 'liveDebugInfo';
+        debugInfo.style.cssText = 'text-align: center; margin-top: 1rem; color: #6b7280; font-size: 0.875rem;';
+        debugInfo.innerHTML = `
+            Active Session ID: <strong>${activeTest ? (activeTest.active_session_id || 'None (Legacy)') : 'N/A'}</strong><br>
+            Total Results for Test: ${results.filter(r => r.test_id === activeId).length}<br>
+            Filtered Results: ${liveResults.length}
+        `;
+        // Insert after the summary cards container (which is usually the parent of liveJoinedCount's parent)
+        // Finding a good place to insert:
+        const summaryContainer = document.querySelector('.summary-cards'); // Assuming class name or structure
+        if (!document.getElementById('liveDebugInfo')) {
+            // Try to find the summary container or just append before table
+            const table = document.getElementById('liveTableBody').closest('table');
+            if (table) {
+                table.parentNode.insertBefore(debugInfo, table);
+            }
+        } else {
+            // Update content if already exists
+            document.getElementById('liveDebugInfo').innerHTML = debugInfo.innerHTML;
+        }
 
         liveTableBody.innerHTML = '';
         if (liveResults.length === 0) {
@@ -445,16 +487,57 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            // We want to show a row for EACH SESSION of a test, not just each test definition.
+            // However, the 'tests' array only contains the definitions.
+            // We need to derive sessions from the results.
+
+            const sessionsMap = {}; // Key: session_id (or 'legacy'), Value: { test, results, timestamp }
+
             tests.forEach(test => {
                 const testResults = resultsByTest[test.id] || [];
 
+                testResults.forEach(r => {
+                    const sessionId = r.session_id || 'legacy';
+                    const key = `${test.id}_${sessionId}`;
+
+                    if (!sessionsMap[key]) {
+                        sessionsMap[key] = {
+                            test: test,
+                            sessionId: sessionId,
+                            results: [],
+                            timestamp: r.start_time // Use first result time as proxy for session start
+                        };
+                    }
+                    sessionsMap[key].results.push(r);
+                });
+            });
+
+            // Convert map to array and sort by timestamp desc
+            const sessions = Object.values(sessionsMap).sort((a, b) => {
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+
+            if (sessions.length === 0) {
+                historyTestsListBody.innerHTML = '<tr><td colspan="4" class="text-center">No test history available.</td></tr>';
+                return;
+            }
+
+            sessions.forEach(session => {
+                const test = session.test;
+                const count = session.results.length;
+                const dateStr = new Date(session.timestamp).toLocaleString();
+                const sessionLabel = session.sessionId === 'legacy' ? '(Old Data)' : '';
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${test.name} ${test.is_active ? '<span class="badge badge-success">Active</span>' : ''}</td>
-                    <td>${new Date(test.created_at).toLocaleDateString()}</td>
-                    <td>${testResults.length} Students</td>
                     <td>
-                        <button class="btn btn-secondary btn-sm view-results-btn" data-id="${test.id}">View Results</button>
+                        <div style="font-weight: 500;">${test.name}</div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">${dateStr} ${sessionLabel}</div>
+                    </td>
+                    <td>${new Date(test.created_at).toLocaleDateString()}</td>
+                    <td>${count} Students</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm view-results-btn" data-test-id="${test.id}" data-session-id="${session.sessionId}">View Results</button>
                     </td>
                 `;
                 historyTestsListBody.appendChild(tr);
@@ -463,17 +546,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Add Event Listeners to buttons
             document.querySelectorAll('.view-results-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const testId = e.target.getAttribute('data-id');
+                    const testId = e.target.getAttribute('data-test-id');
+                    const sessionId = e.target.getAttribute('data-session-id');
+
                     const test = tests.find(t => t.id === testId);
-                    const testResults = resultsByTest[testId] || [];
-                    openHistoryModal(test, testResults);
+
+                    // Filter results for this specific session
+                    const allTestResults = resultsByTest[testId] || [];
+                    const sessionResults = allTestResults.filter(r => {
+                        if (sessionId === 'legacy') return !r.session_id;
+                        return r.session_id === sessionId;
+                    });
+
+                    openHistoryModal(test, sessionResults, sessionId);
                 });
             });
         }
     }
 
-    function openHistoryModal(test, results) {
-        if (historyModalTitle) historyModalTitle.textContent = `Results: ${test.name}`;
+    function openHistoryModal(test, results, sessionId) {
+        const dateStr = results.length > 0 ? new Date(results[0].start_time).toLocaleDateString() : '';
+        if (historyModalTitle) historyModalTitle.textContent = `Results: ${test.name} (${dateStr})`;
         if (historyModalBody) {
             historyModalBody.innerHTML = '';
 
