@@ -1,4 +1,4 @@
-// Question Bank Management for Admin Dashboard
+// Question Bank Management for Instructor Dashboard
 // Handles loading, filtering, pagination, and selection of questions from the question bank
 
 let questionBankState = {
