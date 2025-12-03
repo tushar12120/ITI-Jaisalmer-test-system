@@ -13,10 +13,16 @@ const App = {
     },
 
     saveTest: async (test) => {
+        // Clean the test object - remove null id for new tests
+        const testToSave = { ...test };
+        if (!testToSave.id || testToSave.id === null) {
+            delete testToSave.id; // Let database generate ID for new tests
+        }
+
         // Use upsert to handle both insert and update
         const { data, error } = await supabase
             .from('tests')
-            .upsert(test, { onConflict: 'id' })
+            .upsert(testToSave, { onConflict: 'id' })
             .select();
 
         if (error) {
