@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - ITI Jaisalmer</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <img src="../assets/images/logo.png" alt="ITI Jaisalmer Logo" class="logo">
+            <div>
+                <h1 class="site-title">Analytics Dashboard</h1>
+                <p>Performance Insights & Reports</p>
+            </div>
+        </div>
+    </header>
+
+    <nav style="background: white; border-bottom: 1px solid var(--border-color); padding: 0.5rem 1rem;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; gap: 1rem;">
+            <a href="dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            <select id="batchFilter" class="form-control" style="width: auto;">
+                <option value="all">All Batches</option>
+                <option value="2023">2023-2024</option>
+                <option value="2024">2024-2025</option>
+            </select>
+            <select id="tradeFilter" class="form-control" style="width: auto;">
+                <option value="all">All Trades</option>
+                <option value="COPA">COPA</option>
+                <option value="Electrician">Electrician</option>
+                <option value="Fitter">Fitter</option>
+            </select>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container-fluid" style="max-width: 1400px;">
+            <!-- Key Statistics -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTests">0</div>
+                    <div class="stat-label">Total Tests Taken</div>
+                </div>
+                <div class="stat-card" style="border-color: #10b981;">
+                    <div class="stat-value" id="avgScore">0%</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+                <div class="stat-card" style="border-color: #f59e0b;">
+                    <div class="stat-value" id="passRate">0%</div>
+                    <div class="stat-label">Pass Rate</div>
+                </div>
+                <div class="stat-card" style="border-color: #ef4444;">
+                    <div class="stat-value" id="activeStudents">0</div>
+                    <div class="stat-label">Active Students</div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="analytics-grid">
+                <!-- Performance Trend -->
+                <div class="chart-card" style="grid-column: span 2;">
+                    <div class="chart-header">
+                        <span class="chart-title">Performance Trend (Last 10 Tests)</span>
+                    </div>
+                    <canvas id="trendChart"></canvas>
+                </div>
+
+                <!-- Pass/Fail Distribution -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Pass vs Fail Ratio</span>
+                    </div>
+                    <canvas id="passFailChart"></canvas>
+                </div>
+
+                <!-- Topic Analysis -->
+                <div class="chart-card" style="grid-column: span 2;">
+                    <div class="chart-header">
+                        <span class="chart-title">Topic-wise Performance</span>
+                    </div>
+                    <canvas id="topicChart"></canvas>
+                </div>
+
+                <!-- Score Distribution -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Score Distribution</span>
+                    </div>
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/analytics.js"></script>
+</body>
+
+</html>
