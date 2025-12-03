@@ -1,9 +1,16 @@
 const App = {
-    getTests: async () => {
-        const { data, error } = await supabase
+    getTests: async (options = {}) => {
+        let query = supabase
             .from('tests')
             .select('*')
             .order('created_at', { ascending: false });
+
+        // Default: only show non-deleted tests, unless includeDeleted is true
+        if (!options.includeDeleted) {
+            query = query.eq('is_deleted', false);
+        }
+
+        const { data, error } = await query;
 
         if (error) {
             console.error('Error fetching tests:', error);
@@ -34,9 +41,10 @@ const App = {
     },
 
     deleteTest: async (testId) => {
+        // Soft delete: Mark as is_deleted = true instead of removing
         const { error } = await supabase
             .from('tests')
-            .delete()
+            .update({ is_deleted: true })
             .eq('id', testId);
 
         if (error) {

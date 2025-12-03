@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     async function loadHistoryData() {
-        const tests = await App.getTests();
+        const tests = await App.getTests({ includeDeleted: true });
         const results = await App.getResults();
 
         // Group results by test_id
