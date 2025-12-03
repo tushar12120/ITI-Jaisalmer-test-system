@@ -346,7 +346,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             let cheatingBadge = '';
             if (r.cheating_attempts > 0) {
-                cheatingBadge = `<span class="badge badge-danger">${r.cheating_attempts} Attempts</span>`;
+                // Store logs in a data attribute (safe encoding)
+                const logsStr = r.cheating_logs ? JSON.stringify(r.cheating_logs) : '[]';
+                cheatingBadge = `<span class="badge badge-danger view-cheating-btn" style="cursor: pointer; text-decoration: underline;" data-student-name="${r.student_name}" data-logs='${logsStr}'>${r.cheating_attempts} Attempts</span>`;
             } else {
                 cheatingBadge = '<span class="badge badge-success">Clean</span>';
             }
@@ -483,7 +485,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     let cheatingBadge = '';
                     if (r.cheating_attempts > 0) {
-                        cheatingBadge = `<span class="badge badge-danger">${r.cheating_attempts} Attempts</span>`;
+                        const logsStr = r.cheating_logs ? JSON.stringify(r.cheating_logs) : '[]';
+                        cheatingBadge = `<span class="badge badge-danger view-cheating-btn" style="cursor: pointer; text-decoration: underline;" data-student-name="${r.student_name}" data-logs='${logsStr}'>${r.cheating_attempts} Attempts</span>`;
                     } else {
                         cheatingBadge = '<span class="badge badge-success">Clean</span>';
                     }
@@ -587,6 +590,69 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (wrongAnswersModal) wrongAnswersModal.style.display = 'flex';
     }
+
+    // Cheating Logs Modal Logic
+    const cheatingLogsModal = document.getElementById('cheatingLogsModal');
+    const closeCheatingLogsModal = document.getElementById('closeCheatingLogsModal');
+    const cheatingLogsModalTitle = document.getElementById('cheatingLogsModalTitle');
+    const cheatingLogsContent = document.getElementById('cheatingLogsContent');
+
+    if (closeCheatingLogsModal) {
+        closeCheatingLogsModal.addEventListener('click', () => {
+            cheatingLogsModal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', (e) => {
+        if (e.target === cheatingLogsModal) {
+            cheatingLogsModal.style.display = 'none';
+        }
+    });
+
+    window.openCheatingLogsModal = (studentName, logs) => {
+        if (cheatingLogsModalTitle) cheatingLogsModalTitle.textContent = `Cheating Logs: ${studentName}`;
+
+        if (cheatingLogsContent) {
+            cheatingLogsContent.innerHTML = '';
+
+            if (!logs || logs.length === 0) {
+                cheatingLogsContent.innerHTML = '<p class="text-center">No detailed logs available.</p>';
+            } else {
+                logs.forEach(log => {
+                    const date = new Date(log.timestamp);
+                    const timeStr = date.toLocaleTimeString();
+
+                    const div = document.createElement('div');
+                    div.style.cssText = 'background: #fee2e2; border-left: 4px solid #dc2626; padding: 0.75rem; margin-bottom: 0.75rem; border-radius: 4px;';
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                            <strong style="color: #991b1b;">${log.type}</strong>
+                            <span style="color: #666; font-size: 0.875rem;">${timeStr}</span>
+                        </div>
+                        <div style="color: #333;">${log.message}</div>
+                    `;
+                    cheatingLogsContent.appendChild(div);
+                });
+            }
+        }
+
+        if (cheatingLogsModal) cheatingLogsModal.style.display = 'flex';
+    };
+
+    // Event Delegation for dynamically added elements
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('view-cheating-btn')) {
+            const studentName = e.target.getAttribute('data-student-name');
+            const logsStr = e.target.getAttribute('data-logs');
+            try {
+                const logs = JSON.parse(logsStr);
+                openCheatingLogsModal(studentName, logs);
+            } catch (err) {
+                console.error('Error parsing logs:', err);
+                alert('Error viewing logs');
+            }
+        }
+    });
 
     // Initial Load
     await loadSavedTests();

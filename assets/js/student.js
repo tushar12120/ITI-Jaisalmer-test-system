@@ -70,6 +70,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
     document.body.appendChild(warningModal);
 
+    // Initialize Cheating Logs
+    window.cheatingLogs = [];
+
+    const logCheating = async (type, message) => {
+        const timestamp = new Date().toISOString();
+        const logEntry = { type, message, timestamp };
+        window.cheatingLogs.push(logEntry);
+
+        if (window.resultId) {
+            window.cheatingAttempts = (window.cheatingAttempts || 0) + 1;
+            await App.updateResult(window.resultId, {
+                cheating_attempts: window.cheatingAttempts,
+                cheating_logs: window.cheatingLogs
+            });
+        }
+    };
+
     // 2. Detect Full-Screen Exit (only during active test)
     let testActive = true; // Flag to track if test is ongoing
 
@@ -79,10 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             warningModal.style.display = 'flex';
 
             // Record as cheating attempt
-            if (window.resultId) {
-                window.cheatingAttempts = (window.cheatingAttempts || 0) + 1;
-                App.updateResult(window.resultId, { cheating_attempts: window.cheatingAttempts });
-            }
+            logCheating('Fullscreen Exit', 'Student exited full-screen mode');
         }
     });
 
@@ -121,16 +135,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (e.key === 'PrintScreen') {
             e.preventDefault();
             alert('⚠️ Screenshots are not allowed during the test!');
-            if (window.resultId) {
-                window.cheatingAttempts = (window.cheatingAttempts || 0) + 1;
-                App.updateResult(window.resultId, { cheating_attempts: window.cheatingAttempts });
-            }
+            logCheating('Screenshot Attempt', 'Pressed PrintScreen key');
             return false;
         }
 
         if (e.key === 's' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();
             alert('⚠️ Screenshots are not allowed during the test!');
+            logCheating('Screenshot Attempt', 'Pressed Shift+Cmd/Ctrl+S');
             return false;
         }
 
@@ -154,6 +166,67 @@ document.addEventListener('DOMContentLoaded', async () => {
             return false;
         }
     });
+
+    // 6. Mobile Security: Blur on Inactive & Resize Detection
+    const blurOverlay = document.createElement('div');
+    blurOverlay.id = 'blurOverlay';
+    blurOverlay.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center; text-align: center; padding: 2rem;';
+    blurOverlay.innerHTML = `
+        <div>
+            <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+            <h2 style="color: #dc2626; margin-bottom: 1rem;">Security Violation!</h2>
+            <p style="color: #4b5563; font-size: 1.1rem; margin-bottom: 0.5rem;">You are not allowed to switch apps or use split-screen.</p>
+            <p style="color: #6b7280;">Please return to the test immediately.</p>
+        </div>
+    `;
+    document.body.appendChild(blurOverlay);
+
+    // Blur when window loses focus (e.g., notification shade, app switch)
+    window.addEventListener('blur', () => {
+        if (testActive) {
+            blurOverlay.style.display = 'flex';
+            logCheating('Focus Lost', 'Window lost focus (App switch/Notification)');
+        }
+    });
+
+    window.addEventListener('focus', () => {
+        if (testActive) {
+            blurOverlay.style.display = 'none';
+        }
+    });
+
+    // Detect Resize (Split Screen)
+    let lastWidth = window.innerWidth;
+    let lastHeight = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        if (!testActive) return;
+
+        const widthDiff = Math.abs(window.innerWidth - lastWidth);
+        const heightDiff = Math.abs(window.innerHeight - lastHeight);
+
+        // Ignore small changes (like address bar showing/hiding)
+        if (widthDiff > 50 || heightDiff > 150) {
+            logCheating('Window Resize', `Window resized: ${window.innerWidth}x${window.innerHeight} (Potential Split Screen)`);
+        }
+
+        lastWidth = window.innerWidth;
+        lastHeight = window.innerHeight;
+    });
+
+    // Prevent Touch Context Menu (Long Press)
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) {
+            // Prevent multi-touch gestures if needed, but mainly context menu
+            // e.preventDefault(); 
+        }
+    }, { passive: false });
+
+    window.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }, true);
 
     // ========== MAIN CODE ==========
 
@@ -198,6 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const resetData = {
                 status: 'started',
                 cheating_attempts: 0,
+                cheating_logs: [], // Reset logs
                 score: null,
                 total: null,
                 percentage: null,
@@ -232,7 +306,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             student_name: studentName,
             student_trade: studentTrade,
             status: 'started',
-            cheating_attempts: 0
+            cheating_attempts: 0,
+            cheating_logs: []
         };
 
         const { data: sessionData, error: sessionError } = await App.createResultSession(initialResult);
@@ -257,10 +332,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.addEventListener('visibilitychange', async () => {
         if (cheatingDetectionActive && document.hidden && window.resultId) {
-            window.cheatingAttempts++;
-            await App.updateResult(window.resultId, { cheating_attempts: window.cheatingAttempts });
-            console.log('Cheating attempt recorded:', window.cheatingAttempts);
+            console.log('Cheating attempt recorded: Tab Switch');
             alert('Warning: You are not allowed to switch tabs during the test. This has been recorded.');
+            logCheating('Tab Switch', 'Student switched tabs or minimized window');
         }
     });
 
