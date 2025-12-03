@@ -24,6 +24,8 @@ self.addEventListener('install', event => {
                 return cache.addAll(urlsToCache);
             })
     );
+    // Force the waiting service worker to become the active service worker
+    self.skipWaiting();
 });
 
 // Fetch from cache first, then network
@@ -43,6 +45,9 @@ self.addEventListener('fetch', event => {
 
 // Update service worker and clean old caches
 self.addEventListener('activate', event => {
+    // Take control of all pages immediately
+    event.waitUntil(clients.claim());
+
     const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
         caches.keys().then(cacheNames => {
