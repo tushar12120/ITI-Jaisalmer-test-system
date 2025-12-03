@@ -4,7 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ITI Jaisalmer">
     <title>Admin Dashboard - ITI Jaisalmer</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/images/icons/icon-192x192.png">
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
@@ -385,6 +391,20 @@
     <script src="../assets/js/script.js"></script>
     <script src="../assets/js/admin.js"></script>
     <script src="../assets/js/questionbank.js"></script>
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 
 </html>
