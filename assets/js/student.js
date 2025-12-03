@@ -256,7 +256,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Check if student has already taken this test
     const existingResults = await App.getResults();
     const alreadyTaken = existingResults.find(r =>
-        r.student_id === studentId && r.test_id === activeTest.id
+        r.student_id === studentId &&
+        r.test_id === activeTest.id &&
+        (activeTest.active_session_id ? r.session_id === activeTest.active_session_id : true) // Check session if exists
     );
 
     // Create or Reuse Result Session
@@ -307,7 +309,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             student_trade: studentTrade,
             status: 'started',
             cheating_attempts: 0,
-            cheating_logs: []
+            cheating_logs: [],
+            session_id: activeTest.active_session_id // Include session ID
         };
 
         const { data: sessionData, error: sessionError } = await App.createResultSession(initialResult);
