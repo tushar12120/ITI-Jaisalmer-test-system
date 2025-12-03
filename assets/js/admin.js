@@ -347,29 +347,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (liveCompletedCount) liveCompletedCount.textContent = completed;
         if (liveActiveCount) liveActiveCount.textContent = inProgress;
 
-        // DEBUG: Show Session Info
-        const debugInfo = document.getElementById('liveDebugInfo') || document.createElement('div');
-        debugInfo.id = 'liveDebugInfo';
-        debugInfo.style.cssText = 'text-align: center; margin-top: 1rem; color: #6b7280; font-size: 0.875rem;';
-        debugInfo.innerHTML = `
-            Active Session ID: <strong>${activeTest ? (activeTest.active_session_id || 'None (Legacy)') : 'N/A'}</strong><br>
-            Total Results for Test: ${results.filter(r => r.test_id === activeId).length}<br>
-            Filtered Results: ${liveResults.length}
-        `;
-        // Insert after the summary cards container (which is usually the parent of liveJoinedCount's parent)
-        // Finding a good place to insert:
-        const summaryContainer = document.querySelector('.summary-cards'); // Assuming class name or structure
-        if (!document.getElementById('liveDebugInfo')) {
-            // Try to find the summary container or just append before table
-            const table = document.getElementById('liveTableBody').closest('table');
-            if (table) {
-                table.parentNode.insertBefore(debugInfo, table);
-            }
-        } else {
-            // Update content if already exists
-            document.getElementById('liveDebugInfo').innerHTML = debugInfo.innerHTML;
-        }
-
         liveTableBody.innerHTML = '';
         if (liveResults.length === 0) {
             liveTableBody.innerHTML = '<tr><td colspan="6" class="text-center">No students have joined yet.</td></tr>';

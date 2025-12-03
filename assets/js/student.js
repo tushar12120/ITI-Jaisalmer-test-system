@@ -398,6 +398,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     testForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // IMPORTANT: Disable cheating detection FIRST to prevent false positives
+        cheatingDetectionActive = false;
+        testActive = false;
+
         if (!window.resultId) {
             alert('Error: Could not verify test session.');
             return;
@@ -440,9 +444,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         await App.updateResult(window.resultId, updates);
-
-        // Mark test as no longer active (disable cheating detection)
-        testActive = false;
 
         // Exit full-screen mode (wrapped in try-catch)
         try {
