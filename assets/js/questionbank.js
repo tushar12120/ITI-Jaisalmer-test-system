@@ -47,15 +47,29 @@ let questionBankState = {
 // Load question bank from Supabase
 async function loadQuestionBank() {
     try {
-        const { data, error } = await supabase
+        // Fetch first batch (0-999)
+        const { data: batch1, error: error1 } = await supabase
             .from('question_bank')
             .select('*')
+            .range(0, 999)
             .order('sub_topic', { ascending: true });
 
-        if (error) throw error;
+        if (error1) throw error1;
 
-        console.log('Loaded questions:', data); // Debugging: Check what data is loaded
-        questionBankState.allQuestions = data || [];
+        // Fetch second batch (1000-1999)
+        const { data: batch2, error: error2 } = await supabase
+            .from('question_bank')
+            .select('*')
+            .range(1000, 1999)
+            .order('sub_topic', { ascending: true });
+
+        if (error2) throw error2;
+
+        // Combine both batches
+        const allData = [...(batch1 || []), ...(batch2 || [])];
+
+        console.log('Loaded questions:', allData.length); // Show total count
+        questionBankState.allQuestions = allData;
         questionBankState.filteredQuestions = [...questionBankState.allQuestions];
         updateQuestionBankUI();
     } catch (error) {
