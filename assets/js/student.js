@@ -14,6 +14,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         return Promise.resolve();
     };
 
+    // Custom Toast Notification (doesn't exit fullscreen like alert())
+    const showToast = (message, type = 'warning', duration = 4000) => {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${type === 'error' ? '#DC2626' : type === 'success' ? '#10B981' : '#F59E0B'};
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            z-index: 999999;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
+        `;
+        toast.textContent = message;
+
+        // Add animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideDown 0.3s ease-out reverse';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    };
+
     // Create start overlay
     const startOverlay = document.createElement('div');
     startOverlay.id = 'startOverlay';
@@ -78,8 +118,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Auto-submit if too many violations
             if (window.cheatingAttempts >= MAX_VIOLATIONS) {
-                alert('⛔ Too many security violations! Your test will be auto-submitted.');
-                document.getElementById('testForm')?.requestSubmit();
+                showToast('⛔ Too many security violations! Your test will be auto-submitted.', 'error', 5000);
+                setTimeout(() => {
+                    document.getElementById('testForm')?.requestSubmit();
+                }, 2000);
             }
         }
     };
@@ -100,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 8000);
 
             } catch (err) {
-                alert('⚠️ Please allow full-screen mode to start the test');
+                showToast('⚠️ Please allow full-screen mode to start the test', 'warning', 5000);
             }
         }
     });
@@ -245,8 +287,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const activeTest = await App.getActiveTest();
     if (!activeTest) {
-        alert('No active test found.');
-        window.location.href = '../index.html';
+        showToast('No active test found.', 'error');
+        setTimeout(() => {
+            window.location.href = '../index.html';
+        }, 2000);
         return;
     }
 
@@ -284,16 +328,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (updateError) {
                 console.error('Error resetting result:', updateError);
-                alert('Error processing reattempt. Please contact admin.');
-                window.location.replace('../index.html');
+                showToast('Error processing reattempt. Please contact instructor.', 'error');
+                setTimeout(() => {
+                    window.location.replace('../index.html');
+                }, 2000);
                 return;
             }
 
             console.log('✅ Reattempt: Reusing result ID', window.resultId);
         } else {
-            alert('You have already taken this test. You cannot take it again.');
-            sessionStorage.clear();
-            window.location.replace('../index.html');
+            showToast('You have already taken this test. You cannot take it again.', 'error');
+            setTimeout(() => {
+                sessionStorage.clear();
+                window.location.replace('../index.html');
+            }, 2000);
             return;
         }
     } else {
@@ -314,7 +362,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (sessionError) {
             console.error('Session Error:', sessionError);
-            alert('Error starting test: ' + sessionError.message);
+            showToast('Error starting test: ' + sessionError.message, 'error');
             return;
         }
 
@@ -333,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('visibilitychange', async () => {
         if (window.cheatingDetectionActive && document.hidden && window.resultId) {
             console.log('Cheating attempt recorded: Tab Switch');
-            alert('Warning: You are not allowed to switch tabs during the test. This has been recorded.');
+            showToast('⚠️ Warning: Tab switching is not allowed! This has been recorded.', 'warning', 5000);
             logCheating('Tab Switch', 'Student switched tabs or minimized window');
         }
     });
@@ -400,7 +448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('[Security] ⛔ Monitoring DISABLED (test submitted)');
 
         if (!window.resultId) {
-            alert('Error: Could not verify test session.');
+            showToast('Error: Could not verify test session.', 'error');
             return;
         }
 
