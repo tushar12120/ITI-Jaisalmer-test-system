@@ -204,7 +204,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             ">
                 <div style="font-size: 4rem; margin-bottom: 1rem;">⏱️</div>
                 <h2 style="color: #667eea; margin-bottom: 0.5rem; font-size: 1.75rem;">Select Test Duration</h2>
-                <p style="color: #6c757d; margin-bottom: 2rem;">Choose how long students will have to complete the test</p>
+                <p style="color: #6c757d; margin-bottom: 1rem;">Choose how long students will have to complete the test</p>
+                
+                <button class="timer-option-btn" data-minutes="1" style="
+                    width: 100%;
+                    padding: 0.75rem;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    margin-bottom: 1rem;
+                    box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
+                ">
+                    ⚡ 1 min (Testing Only)
+                </button>
                 
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
                     <button class="timer-option-btn" data-minutes="30" style="
