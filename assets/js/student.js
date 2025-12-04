@@ -195,12 +195,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Detect Resize (Split Screen)
+    // Detect Resize (Split Screen) - with delay to prevent false positives on fullscreen start
     let lastWidth = window.innerWidth;
     let lastHeight = window.innerHeight;
+    let resizeDetectionActive = false;
+
+    // Wait 5 seconds before activating resize detection (prevents false positive on fullscreen entry)
+    setTimeout(() => {
+        resizeDetectionActive = true;
+        lastWidth = window.innerWidth;
+        lastHeight = window.innerHeight;
+        console.log('Resize detection activated');
+    }, 5000);
 
     window.addEventListener('resize', () => {
-        if (!window.testActive) return;
+        if (!window.testActive || !resizeDetectionActive) return;
 
         const widthDiff = Math.abs(window.innerWidth - lastWidth);
         const heightDiff = Math.abs(window.innerHeight - lastHeight);
