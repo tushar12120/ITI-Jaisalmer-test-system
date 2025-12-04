@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.cheatingAttempts = 0;
     window.lastViolationTime = 0;
     const MAX_VIOLATIONS = 5;
-    const COOLDOWN_MS = 4000; // 4 second cooldown between ANY violations
+    const COOLDOWN_MS = 8000; // 8 second cooldown between ANY violations
 
     // Simple Cheating Logger with 4 second cooldown
     const logCheating = async (type, message) => {
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 2. MOBILE SCREENSHOT PROTECTION + HOME BUTTON DETECTION
+    // 2. MOBILE HOME BUTTON / APP SWITCH DETECTION
     // Create black overlay for screenshot protection
     const screenshotOverlay = document.createElement('div');
     screenshotOverlay.id = 'screenshotOverlay';
@@ -151,50 +151,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
     document.body.appendChild(screenshotOverlay);
 
-    // When page is not visible (screenshot, app switch, home button)
+    // Only detect visibility change (most reliable, no false positives)
     document.addEventListener('visibilitychange', () => {
         if (!window.testActive) return;
 
         if (document.hidden) {
-            // Show black screen immediately (screenshot will capture black)
             screenshotOverlay.style.display = 'block';
-            logCheating('Screenshot/App Switch', 'Page hidden - possible screenshot or app switch');
+            logCheating('App Switch', 'Left app or used home button');
         } else {
-            // Hide after small delay when returning
             setTimeout(() => {
                 screenshotOverlay.style.display = 'none';
-            }, 300);
+            }, 500);
         }
     });
-
-    // Also detect blur (catches some screenshot methods)
-    window.addEventListener('blur', () => {
-        if (window.testActive) {
-            screenshotOverlay.style.display = 'block';
-        }
-    });
-
-    window.addEventListener('focus', () => {
-        setTimeout(() => {
-            screenshotOverlay.style.display = 'none';
-        }, 300);
-    });
-
-    // 3. DEVTOOLS DETECTION
-    let devtoolsOpen = false;
-    const detectDevTools = () => {
-        const threshold = 160;
-        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-
-        if ((widthThreshold || heightThreshold) && !devtoolsOpen) {
-            devtoolsOpen = true;
-            logCheating('DevTools', 'Attempted to open developer tools');
-        } else if (!widthThreshold && !heightThreshold) {
-            devtoolsOpen = false;
-        }
-    };
-    setInterval(detectDevTools, 1000);
 
     // 4. KEYBOARD SHORTCUTS BLOCK
     document.addEventListener('keydown', (e) => {

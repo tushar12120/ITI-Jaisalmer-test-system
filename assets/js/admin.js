@@ -386,13 +386,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statusBadge = '<span class="badge badge-warning">In Progress</span>';
             }
 
-            let cheatingBadge = '';
+            let securityBadge = '';
             if (r.cheating_attempts > 0) {
-                // Store logs in a data attribute (safe encoding)
                 const logsStr = r.cheating_logs ? JSON.stringify(r.cheating_logs) : '[]';
-                cheatingBadge = `<span class="badge badge-danger view-cheating-btn" style="cursor: pointer; text-decoration: underline;" data-student-name="${r.student_name}" data-logs='${logsStr}'>${r.cheating_attempts} Attempts</span>`;
+                securityBadge = `<span class="badge badge-danger view-cheating-btn" style="cursor: pointer;" data-student-name="${r.student_name}" data-logs='${logsStr}'>${r.cheating_attempts} Attempts</span>`;
             } else {
-                cheatingBadge = '<span class="badge badge-success">Clean</span>';
+                securityBadge = '<span class="badge badge-success">0 Attempts</span>';
             }
 
             // Reattempt button - only show if completed or has cheating attempts, and not already granted
@@ -406,7 +405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tr.innerHTML = `
                 <td>${r.student_name} (${r.student_trade})</td>
                 <td>${statusBadge}</td>
-                <td>${cheatingBadge}</td>
+                <td>${securityBadge}</td>
                 <td>${r.status === 'completed' ? r.percentage + '%' : '-'}</td>
                 <td>${new Date(r.start_time).toLocaleTimeString()}</td>
                 <td>${actionButton}</td>
