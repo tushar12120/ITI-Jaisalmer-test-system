@@ -92,12 +92,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 startOverlay.style.display = 'none';
                 if (testContent) testContent.style.display = 'flex';
 
-                // Activate security after 5 seconds (allow fullscreen to stabilize)
+                // Activate security after 8 seconds (allow fullscreen to stabilize)
                 setTimeout(() => {
                     window.testActive = true;
                     window.testStartTime = Date.now();
-                    console.log('[Security] ✅ Advanced Monitoring ACTIVE');
-                }, 5000);
+                    console.log('[Security] ✅ Monitoring ACTIVE');
+                }, 8000);
 
             } catch (err) {
                 alert('⚠️ Please allow full-screen mode to start the test');
@@ -204,12 +204,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return false;
     });
 
-    // 8. PRINT BLOCK
+    // 8. PRINT BLOCK (no logging, just block)
     window.addEventListener('beforeprint', (e) => {
-        if (window.testActive) {
-            e.preventDefault();
-            logCheating('Print Attempt', 'Tried to print the test');
-        }
+        e.preventDefault();
     });
 
     // 9. COPY/CUT/PASTE BLOCK
