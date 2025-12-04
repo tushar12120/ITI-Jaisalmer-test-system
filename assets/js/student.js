@@ -1,4 +1,132 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // ========== BROWSER DETECTION & BLOCKING ==========
+
+    const detectBrowser = () => {
+        const ua = navigator.userAgent;
+        const isChrome = /Chrome/.test(ua) && /Google Inc/.test(navigator.vendor);
+        const isEdge = /Edg/.test(ua);
+        const isFirefox = /Firefox/.test(ua);
+        const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+        const isOpera = /OPR|Opera/.test(ua);
+        const isBrave = navigator.brave !== undefined;
+        const isUC = /UCBrowser/.test(ua);
+        const isSamsung = /SamsungBrowser/.test(ua);
+        const isMiui = /MiuiBrowser/.test(ua);
+
+        const isAndroid = /Android/.test(ua);
+        const isIOS = /iPhone|iPad|iPod/.test(ua);
+        const isWindows = /Windows/.test(ua);
+        const isMac = /Macintosh/.test(ua);
+        const isLinux = /Linux/.test(ua) && !isAndroid;
+
+        return {
+            isChrome, isEdge, isFirefox, isSafari, isOpera, isBrave, isUC, isSamsung, isMiui,
+            isAndroid, isIOS, isWindows, isMac, isLinux
+        };
+    };
+
+    const browser = detectBrowser();
+
+    // Define allowed browsers
+    const isAllowedBrowser =
+        (browser.isChrome && !browser.isEdge) ||  // Chrome (not Edge)
+        browser.isEdge ||                          // Edge
+        browser.isFirefox ||                       // Firefox
+        (browser.isSafari && browser.isIOS);       // Safari on iOS/iPad only
+
+    // Block unsupported browsers
+    if (!isAllowedBrowser) {
+        let browserName = 'Unknown Browser';
+        if (browser.isOpera) browserName = 'Opera';
+        else if (browser.isBrave) browserName = 'Brave';
+        else if (browser.isUC) browserName = 'UC Browser';
+        else if (browser.isSamsung) browserName = 'Samsung Internet';
+        else if (browser.isMiui) browserName = 'Mi Browser';
+        else if (browser.isSafari && !browser.isIOS) browserName = 'Safari (Desktop)';
+
+        document.body.innerHTML = `
+            <div style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 2rem;
+            ">
+                <div style="
+                    background: white;
+                    padding: 3rem;
+                    border-radius: 20px;
+                    text-align: center;
+                    max-width: 600px;
+                    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+                ">
+                    <div style="font-size: 5rem; margin-bottom: 1.5rem;">🚫</div>
+                    <h1 style="color: #dc3545; margin-bottom: 1rem; font-size: 2rem;">Unsupported Browser</h1>
+                    
+                    <p style="color: #495057; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                        You are currently using <strong>${browserName}</strong>
+                    </p>
+                    
+                    <div style="
+                        background: #fff3cd;
+                        border: 2px solid #ffc107;
+                        padding: 1.5rem;
+                        border-radius: 12px;
+                        margin-bottom: 2rem;
+                        text-align: left;
+                    ">
+                        <h3 style="color: #856404; margin-bottom: 1rem; font-size: 1.2rem;">
+                            ✅ Supported Browsers:
+                        </h3>
+                        <ul style="color: #495057; margin: 0 0 0 1.5rem; padding: 0;">
+                            <li style="margin-bottom: 0.5rem;"><strong>PC/Laptop:</strong> Google Chrome, Microsoft Edge, Mozilla Firefox</li>
+                            <li style="margin-bottom: 0.5rem;"><strong>Android:</strong> Google Chrome</li>
+                            <li style="margin-bottom: 0.5rem;"><strong>iPhone/iPad:</strong> Safari</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="color: #6c757d; font-size: 0.95rem; margin-bottom: 1.5rem;">
+                        Please open this test in one of the supported browsers for the best and secure testing experience.
+                    </p>
+                    
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                        <a href="https://www.google.com/chrome/" target="_blank" style="
+                            display: inline-block;
+                            padding: 0.75rem 1.5rem;
+                            background: #4285f4;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 8px;
+                            font-weight: 600;
+                        ">Download Chrome</a>
+                        
+                        <a href="https://www.microsoft.com/edge" target="_blank" style="
+                            display: inline-block;
+                            padding: 0.75rem 1.5rem;
+                            background: #0078d4;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 8px;
+                            font-weight: 600;
+                        ">Download Edge</a>
+                        
+                        <a href="https://www.mozilla.org/firefox/" target="_blank" style="
+                            display: inline-block;
+                            padding: 0.75rem 1.5rem;
+                            background: #ff7139;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 8px;
+                            font-weight: 600;
+                        ">Download Firefox</a>
+                    </div>
+                </div>
+            </div>
+        `;
+        return; // Stop execution
+    }
+
     // ========== FULLSCREEN & SECURITY SYSTEM ==========
 
     // Fullscreen Helper Function
