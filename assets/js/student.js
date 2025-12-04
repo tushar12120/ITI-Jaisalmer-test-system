@@ -388,9 +388,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
             document.body.appendChild(terminateOverlay);
 
-            // Submit partial result and redirect
+            // Submit result with 0 score and redirect
             await App.updateResult(window.resultId, {
                 status: 'terminated_violations',
+                score: 0,
+                total: 0,
+                percentage: 0,
+                answers: [],
                 end_time: new Date().toISOString()
             });
 

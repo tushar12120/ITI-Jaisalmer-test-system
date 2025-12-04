@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Calculate Stats
         const totalJoined = liveResults.length;
-        const completed = liveResults.filter(r => r.status === 'completed').length;
+        const completed = liveResults.filter(r => r.status === 'completed' || r.status === 'terminated_violations').length;
         const inProgress = totalJoined - completed;
 
         if (liveJoinedCount) liveJoinedCount.textContent = totalJoined;
@@ -382,6 +382,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             let statusBadge = '';
             if (r.status === 'completed') {
                 statusBadge = '<span class="badge badge-success">Completed</span>';
+            } else if (r.status === 'terminated_violations') {
+                statusBadge = '<span class="badge badge-danger">Terminated (Cheating)</span>';
             } else {
                 statusBadge = '<span class="badge badge-warning">In Progress</span>';
             }
@@ -406,7 +408,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td>${r.student_name} (${r.student_trade})</td>
                 <td>${statusBadge}</td>
                 <td>${securityBadge}</td>
-                <td>${r.status === 'completed' ? r.percentage + '%' : '-'}</td>
+                <td>${(r.status === 'completed' || r.status === 'terminated_violations') ? (r.percentage !== null ? r.percentage + '%' : '0%') : '-'}</td>
                 <td>${new Date(r.start_time).toLocaleTimeString()}</td>
                 <td>${actionButton}</td>
             `;
