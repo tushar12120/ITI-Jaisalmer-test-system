@@ -252,12 +252,161 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // ========== MAXIMUM SECURITY LAYERS ==========
+
+    // 1. AUTO-RETURN TO FULLSCREEN (Aggressive)
+    let fullscreenCheckInterval;
+    const enforceFullscreen = () => {
+        if (window.testActive && !document.fullscreenElement) {
+            // Auto-return to fullscreen after 2 seconds
+            setTimeout(async () => {
+                if (window.testActive && !document.fullscreenElement) {
+                    try {
+                        await requestFullScreen();
+                    } catch (err) {
+                        console.log('Auto-fullscreen failed:', err);
+                    }
+                }
+            }, 2000);
+        }
+    };
+
+    // Check fullscreen status every 3 seconds
+    fullscreenCheckInterval = setInterval(() => {
+        if (window.testActive) {
+            enforceFullscreen();
+        }
+    }, 3000);
+
+    // 2. PREVENT BACK BUTTON
+    history.pushState(null, null, window.location.href);
+    window.addEventListener('popstate', function () {
+        if (window.testActive) {
+            history.pushState(null, null, window.location.href);
+            violationModal.style.display = 'flex';
+            document.getElementById('violationCount').textContent = window.cheatingAttempts + 1;
+            logViolation('Back Button', 'Student tried to use back button');
+        }
+    });
+
+    // 3. BLOCK KEYBOARD SHORTCUTS
+    document.addEventListener('keydown', (e) => {
+        if (!window.testActive) return;
+
+        const blockedKeys = [
+            e.key === 'F12',                                    // DevTools
+            e.key === 'F11',                                    // Fullscreen toggle
+            e.key === 'Escape',                                 // ESC
+            e.key === 'PrintScreen',                            // Screenshot
+            e.ctrlKey && e.key === 'p',                         // Print
+            e.ctrlKey && e.key === 's',                         // Save
+            e.ctrlKey && e.key === 'c',                         // Copy
+            e.ctrlKey && e.key === 'v',                         // Paste
+            e.ctrlKey && e.key === 'x',                         // Cut
+            e.ctrlKey && e.key === 'a',                         // Select All
+            e.ctrlKey && e.key === 'u',                         // View Source
+            e.ctrlKey && e.shiftKey && e.key === 'I',          // DevTools
+            e.ctrlKey && e.shiftKey && e.key === 'J',          // Console
+            e.ctrlKey && e.shiftKey && e.key === 'C',          // Inspect
+            e.altKey && e.key === 'Tab',                        // Alt+Tab
+            e.altKey && e.key === 'F4',                         // Close window
+            e.metaKey                                           // Windows/Cmd key
+        ];
+
+        if (blockedKeys.some(Boolean)) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('[Security] Blocked key:', e.key);
+            return false;
+        }
+    }, true);
+
+    // 4. DISABLE RIGHT-CLICK
+    document.addEventListener('contextmenu', (e) => {
+        if (window.testActive) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 5. DISABLE TEXT SELECTION
+    document.addEventListener('selectstart', (e) => {
+        if (window.testActive) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 6. DISABLE DRAG & DROP
+    document.addEventListener('dragstart', (e) => {
+        if (window.testActive) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 7. DISABLE COPY/CUT/PASTE
+    ['copy', 'cut', 'paste'].forEach(event => {
+        document.addEventListener(event, (e) => {
+            if (window.testActive) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+
+    // 8. DISABLE PRINT
+    window.addEventListener('beforeprint', (e) => {
+        if (window.testActive) {
+            e.preventDefault();
+            alert('Printing is disabled during the test');
+        }
+    });
+
+    // 9. AUTO-SUBMIT ON MAX VIOLATIONS
+    const checkMaxViolations = () => {
+        if (window.cheatingAttempts >= MAX_VIOLATIONS) {
+            window.testActive = false;
+            clearInterval(fullscreenCheckInterval);
+
+            const submitOverlay = document.createElement('div');
+            submitOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(220, 53, 69, 0.95);
+                z-index: 999999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            submitOverlay.innerHTML = `
+                <div style="background: white; padding: 3rem; border-radius: 20px; text-align: center; max-width: 500px;">
+                    <div style="font-size: 5rem; margin-bottom: 1rem;">⛔</div>
+                    <h2 style="color: #dc3545; margin-bottom: 1rem;">Test Auto-Submitted</h2>
+                    <p style="font-size: 1.2rem; color: #495057; margin-bottom: 1rem;">
+                        Too many security violations detected!
+                    </p>
+                    <p style="color: #6c757d;">Your test has been automatically submitted.</p>
+                </div>
+            `;
+            document.body.appendChild(submitOverlay);
+
+            setTimeout(() => {
+                document.getElementById('testForm')?.requestSubmit();
+            }, 3000);
+        }
+    };
+
     // Fullscreen Exit Detection
     document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement && window.testActive) {
             violationModal.style.display = 'flex';
             document.getElementById('violationCount').textContent = window.cheatingAttempts + 1;
             logViolation('Fullscreen Exit', 'Student exited full-screen mode');
+            checkMaxViolations();
         }
     });
 
@@ -267,6 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             violationModal.style.display = 'flex';
             document.getElementById('violationCount').textContent = window.cheatingAttempts + 1;
             logViolation('App Switch', 'Student switched tabs or pressed home button');
+            checkMaxViolations();
         }
     });
 
