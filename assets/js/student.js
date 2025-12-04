@@ -88,10 +88,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // 2. Detect Full-Screen Exit (only during active test)
-    let testActive = true; // Flag to track if test is ongoing
+    window.testActive = true; // Flag to track if test is ongoing (window scope for accessibility)
 
     document.addEventListener('fullscreenchange', () => {
-        if (!document.fullscreenElement && testActive) {
+        if (!document.fullscreenElement && window.testActive) {
             // Show custom modal instead of alert
             warningModal.style.display = 'flex';
 
@@ -183,14 +183,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Blur when window loses focus (e.g., notification shade, app switch)
     window.addEventListener('blur', () => {
-        if (testActive) {
+        if (window.testActive) {
             blurOverlay.style.display = 'flex';
             logCheating('Focus Lost', 'Window lost focus (App switch/Notification)');
         }
     });
 
     window.addEventListener('focus', () => {
-        if (testActive) {
+        if (window.testActive) {
             blurOverlay.style.display = 'none';
         }
     });
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let lastHeight = window.innerHeight;
 
     window.addEventListener('resize', () => {
-        if (!testActive) return;
+        if (!window.testActive) return;
 
         const widthDiff = Math.abs(window.innerWidth - lastWidth);
         const heightDiff = Math.abs(window.innerHeight - lastHeight);
@@ -327,14 +327,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Cheating Detection (Tab Switching)
-    let cheatingDetectionActive = false;
+    window.cheatingDetectionActive = false;
     setTimeout(() => {
-        cheatingDetectionActive = true;
+        window.cheatingDetectionActive = true;
         console.log('Cheating detection activated');
     }, 3000);
 
     document.addEventListener('visibilitychange', async () => {
-        if (cheatingDetectionActive && document.hidden && window.resultId) {
+        if (window.cheatingDetectionActive && document.hidden && window.resultId) {
             console.log('Cheating attempt recorded: Tab Switch');
             alert('Warning: You are not allowed to switch tabs during the test. This has been recorded.');
             logCheating('Tab Switch', 'Student switched tabs or minimized window');
@@ -399,8 +399,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
 
         // IMPORTANT: Disable cheating detection FIRST to prevent false positives
-        cheatingDetectionActive = false;
-        testActive = false;
+        window.cheatingDetectionActive = false;
+        window.testActive = false;
+        console.log('Test submitted - Security monitoring disabled');
 
         if (!window.resultId) {
             alert('Error: Could not verify test session.');
