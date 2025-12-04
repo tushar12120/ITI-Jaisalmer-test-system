@@ -294,25 +294,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Timer option buttons
     timerModal.querySelectorAll('.timer-option-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
-            const minutes = parseInt(btn.getAttribute('data-minutes'));
-            timerModal.style.display = 'none';
+            try {
+                const minutes = parseInt(btn.getAttribute('data-minutes'));
+                console.log('[Timer] Selected:', minutes, 'minutes');
+                console.log('[Timer] Current Test:', currentTest);
 
-            const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                timerModal.style.display = 'none';
 
-            await App.saveTest({
-                ...currentTest,
-                status: 'active',
-                is_active: true,
-                active_session_id: sessionId,
-                timer_duration: minutes,
-                timer_start: new Date().toISOString()
-            });
+                const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                console.log('[Timer] Session ID:', sessionId);
 
-            await App.setActiveTestId(currentTest.id);
-            updateStatusDisplay();
-            loadSavedTests();
+                await App.saveTest({
+                    ...currentTest,
+                    status: 'active',
+                    is_active: true,
+                    active_session_id: sessionId,
+                    timer_duration: minutes,
+                    timer_start: new Date().toISOString()
+                });
+                console.log('[Timer] Test saved');
 
-            alert(`✅ Test started with ${minutes} minute timer!`);
+                await App.setActiveTestId(currentTest.id);
+                console.log('[Timer] Active test ID set');
+
+                updateStatusDisplay();
+                loadSavedTests();
+
+                alert(`✅ Test started with ${minutes} minute timer!`);
+            } catch (error) {
+                console.error('[Timer] Error:', error);
+                alert('Error starting test: ' + error.message);
+            }
         });
     });
 
