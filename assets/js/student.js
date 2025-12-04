@@ -354,12 +354,51 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         console.log(`[Security] Violation #${window.cheatingAttempts}: ${type}`);
 
-        // Check if max violations reached
+        // Check if max violations reached - IMMEDIATELY terminate
         if (window.cheatingAttempts >= MAX_VIOLATIONS) {
-            alert('⛔ Too many violations! Your test will be auto-submitted.');
+            window.testActive = false;
+
+            // Hide any existing modals
+            const violationModal = document.getElementById('violationModal');
+            if (violationModal) violationModal.style.display = 'none';
+
+            // Show termination overlay
+            const terminateOverlay = document.createElement('div');
+            terminateOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(220, 53, 69, 0.98);
+                z-index: 999999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            terminateOverlay.innerHTML = `
+                <div style="background: white; padding: 3rem; border-radius: 20px; text-align: center; max-width: 500px;">
+                    <div style="font-size: 5rem; margin-bottom: 1rem;">⛔</div>
+                    <h2 style="color: #dc3545; margin-bottom: 1rem; font-size: 2rem;">Test Terminated!</h2>
+                    <p style="font-size: 1.2rem; color: #495057; margin-bottom: 1rem;">
+                        Maximum violations reached (${MAX_VIOLATIONS}/${MAX_VIOLATIONS})
+                    </p>
+                    <p style="color: #6c757d;">Redirecting to home page...</p>
+                </div>
+            `;
+            document.body.appendChild(terminateOverlay);
+
+            // Submit partial result and redirect
+            await App.updateResult(window.resultId, {
+                status: 'terminated_violations',
+                end_time: new Date().toISOString()
+            });
+
+            // Redirect to home after 3 seconds
             setTimeout(() => {
-                document.getElementById('testForm')?.requestSubmit();
-            }, 2000);
+                sessionStorage.clear();
+                window.location.replace('../index.html');
+            }, 3000);
         }
     };
 
