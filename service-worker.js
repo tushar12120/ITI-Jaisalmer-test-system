@@ -1,4 +1,4 @@
-const CACHE_NAME = 'iti-jaisalmer-v28';
+const CACHE_NAME = 'iti-jaisalmer-v29';
 const urlsToCache = [
     '/',
     '/index.html',

@@ -734,6 +734,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const autoSubmitTest = async () => {
         window.testActive = false;
 
+        // Clear the timer interval
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+
         // Show time's up overlay
         const timeUpOverlay = document.createElement('div');
         timeUpOverlay.style.cssText = `
@@ -760,9 +765,82 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
         document.body.appendChild(timeUpOverlay);
 
-        // Submit the test
-        setTimeout(() => {
-            document.getElementById('testForm')?.requestSubmit();
+        // Auto-submit after 2 seconds
+        setTimeout(async () => {
+            try {
+                // Calculate score
+                let score = 0;
+                const total = window.shuffledQuestions.length;
+                const answers = [];
+
+                window.shuffledQuestions.forEach((q, index) => {
+                    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                    const answer = selected ? selected.value : null;
+
+                    answers.push({
+                        question: q.text,
+                        selected: answer,
+                        selectedText: answer ? q.options[answer] : 'Not Answered',
+                        correct: q.correct,
+                        correctText: q.options[q.correct],
+                        isCorrect: answer === q.correct
+                    });
+
+                    if (answer === q.correct) score++;
+                });
+
+                const percentage = Math.round((score / total) * 100);
+
+                // Update result in database
+                await App.updateResult(window.resultId, {
+                    score,
+                    total,
+                    percentage,
+                    answers,
+                    status: 'completed',
+                    end_time: new Date().toISOString()
+                });
+
+                // Exit fullscreen
+                try {
+                    if (document.fullscreenElement && document.exitFullscreen) {
+                        await document.exitFullscreen();
+                    }
+                } catch (err) {
+                    console.log('Fullscreen exit error:', err);
+                }
+
+                // Update overlay with result
+                timeUpOverlay.innerHTML = `
+                    <div style="background: white; padding: 3rem; border-radius: 20px; text-align: center; max-width: 500px;">
+                        <div style="font-size: 5rem; margin-bottom: 1rem;">✅</div>
+                        <h2 style="color: #22c55e; margin-bottom: 1rem; font-size: 2rem;">Test Submitted!</h2>
+                        <p style="font-size: 3rem; font-weight: bold; color: #667eea; margin-bottom: 1rem;">
+                            ${percentage}%
+                        </p>
+                        <p style="font-size: 1.2rem; color: #495057;">
+                            You scored ${score} out of ${total}
+                        </p>
+                        <p style="color: #6c757d; margin-top: 1rem;">Redirecting...</p>
+                    </div>
+                `;
+
+                // Redirect after showing result
+                setTimeout(() => {
+                    sessionStorage.clear();
+                    window.location.replace('../index.html');
+                }, 3000);
+
+            } catch (error) {
+                console.error('Auto-submit error:', error);
+                timeUpOverlay.innerHTML = `
+                    <div style="background: white; padding: 3rem; border-radius: 20px; text-align: center; max-width: 500px;">
+                        <div style="font-size: 5rem; margin-bottom: 1rem;">❌</div>
+                        <h2 style="color: #dc3545; margin-bottom: 1rem;">Submission Error</h2>
+                        <p style="color: #495057;">${error.message}</p>
+                    </div>
+                `;
+            }
         }, 2000);
     };
 
