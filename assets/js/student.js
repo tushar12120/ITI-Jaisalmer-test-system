@@ -40,6 +40,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     const testContent = document.querySelector('main');
     if (testContent) testContent.style.display = 'none';
 
+    // ========== ADVANCED SECURITY SYSTEM ==========
+
+    // Security State
+    window.testActive = false;
+    window.cheatingLogs = [];
+    window.cheatingAttempts = 0;
+    window.lastViolationTime = 0;
+    const MAX_VIOLATIONS = 5;
+    const COOLDOWN_MS = 4000; // 4 second cooldown between ANY violations
+
+    // Simple Cheating Logger with 4 second cooldown
+    const logCheating = async (type, message) => {
+        if (!window.testActive) return;
+
+        const now = Date.now();
+
+        // 4 second cooldown between ANY violations
+        if (now - window.lastViolationTime < COOLDOWN_MS) {
+            console.log(`[Security] ⏳ Ignored (cooldown): ${type}`);
+            return;
+        }
+
+        // Update tracking
+        window.lastViolationTime = now;
+
+        const timestamp = new Date().toISOString();
+        window.cheatingLogs.push({ type, message, timestamp });
+
+        if (window.resultId) {
+            window.cheatingAttempts++;
+            await App.updateResult(window.resultId, {
+                cheating_attempts: window.cheatingAttempts,
+                cheating_logs: window.cheatingLogs
+            });
+            console.log(`[Security] ⚠️ LOGGED: ${type} (${window.cheatingAttempts}/${MAX_VIOLATIONS})`);
+
+            // Auto-submit if too many violations
+            if (window.cheatingAttempts >= MAX_VIOLATIONS) {
+                alert('⛔ Too many security violations! Your test will be auto-submitted.');
+                document.getElementById('testForm')?.requestSubmit();
+            }
+        }
+    };
+
     // Start test button handler
     document.addEventListener('click', async (e) => {
         if (e.target.id === 'startTestBtn') {
@@ -47,22 +91,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await requestFullScreen();
                 startOverlay.style.display = 'none';
                 if (testContent) testContent.style.display = 'flex';
+
+                // Activate security after 5 seconds (allow fullscreen to stabilize)
+                setTimeout(() => {
+                    window.testActive = true;
+                    window.testStartTime = Date.now();
+                    console.log('[Security] ✅ Advanced Monitoring ACTIVE');
+                }, 5000);
+
             } catch (err) {
                 alert('⚠️ Please allow full-screen mode to start the test');
-                console.error('Fullscreen error:', err);
             }
         }
     });
 
-    // Create custom warning modal (better than alert for full-screen re-entry)
+    // Create warning modal for fullscreen exit
     const warningModal = document.createElement('div');
     warningModal.id = 'warningModal';
-    warningModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center;';
+    warningModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center;';
     warningModal.innerHTML = `
-        <div style="background: white; padding: 2.5rem; border-radius: 12px; text-align: center; max-width: 450px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-            <h2 style="color: #dc2626; margin-bottom: 1rem;">Warning!</h2>
-            <p style="color: #4b5563; margin-bottom: 1.5rem; line-height: 1.6;">You exited full-screen mode!<br><br>This has been recorded as a <strong>cheating attempt</strong>.<br><br>Click the button below to return to full-screen and continue your test.</p>
+        <div style="background: white; padding: 2.5rem; border-radius: 12px; text-align: center; max-width: 450px;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🚨</div>
+            <h2 style="color: #dc2626; margin-bottom: 1rem;">Security Violation!</h2>
+            <p style="color: #4b5563; margin-bottom: 1rem;">You exited full-screen mode!</p>
+            <p style="color: #dc2626; font-weight: 600; margin-bottom: 1.5rem;">Violations: <span id="violationCount">0</span>/${MAX_VIOLATIONS}</p>
             <button id="returnFullScreenBtn" style="width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: 600; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer;">
                 Return to Full-Screen
             </button>
@@ -70,37 +122,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
     document.body.appendChild(warningModal);
 
-    // Initialize Cheating Logs
-    window.cheatingLogs = [];
-
-    const logCheating = async (type, message) => {
-        const timestamp = new Date().toISOString();
-        const logEntry = { type, message, timestamp };
-        window.cheatingLogs.push(logEntry);
-
-        if (window.resultId) {
-            window.cheatingAttempts = (window.cheatingAttempts || 0) + 1;
-            await App.updateResult(window.resultId, {
-                cheating_attempts: window.cheatingAttempts,
-                cheating_logs: window.cheatingLogs
-            });
-        }
-    };
-
-    // 2. Detect Full-Screen Exit (only during active test)
-    window.testActive = true; // Flag to track if test is ongoing (window scope for accessibility)
-
+    // 1. FULLSCREEN EXIT DETECTION
     document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement && window.testActive) {
-            // Show custom modal instead of alert
             warningModal.style.display = 'flex';
-
-            // Record as cheating attempt
-            logCheating('Fullscreen Exit', 'Student exited full-screen mode');
+            document.getElementById('violationCount').textContent = window.cheatingAttempts + 1;
+            logCheating('Fullscreen Exit', 'Exited full-screen mode');
         }
     });
 
-    // Return to full-screen button handler
+    // Return to fullscreen button
     document.addEventListener('click', async (e) => {
         if (e.target.id === 'returnFullScreenBtn') {
             warningModal.style.display = 'none';
@@ -108,134 +139,125 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 3. Disable Context Menu (Right Click)
+    // 2. MOBILE SCREENSHOT PROTECTION + HOME BUTTON DETECTION
+    // Create black overlay for screenshot protection
+    const screenshotOverlay = document.createElement('div');
+    screenshotOverlay.id = 'screenshotOverlay';
+    screenshotOverlay.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 99999;';
+    screenshotOverlay.innerHTML = `
+        <div style="color: white; text-align: center; padding-top: 40vh; font-size: 1.5rem;">
+            🔒 Protected Content
+        </div>
+    `;
+    document.body.appendChild(screenshotOverlay);
+
+    // When page is not visible (screenshot, app switch, home button)
+    document.addEventListener('visibilitychange', () => {
+        if (!window.testActive) return;
+
+        if (document.hidden) {
+            // Show black screen immediately (screenshot will capture black)
+            screenshotOverlay.style.display = 'block';
+            logCheating('Screenshot/App Switch', 'Page hidden - possible screenshot or app switch');
+        } else {
+            // Hide after small delay when returning
+            setTimeout(() => {
+                screenshotOverlay.style.display = 'none';
+            }, 300);
+        }
+    });
+
+    // Also detect blur (catches some screenshot methods)
+    window.addEventListener('blur', () => {
+        if (window.testActive) {
+            screenshotOverlay.style.display = 'block';
+        }
+    });
+
+    window.addEventListener('focus', () => {
+        setTimeout(() => {
+            screenshotOverlay.style.display = 'none';
+        }, 300);
+    });
+
+    // 3. DEVTOOLS DETECTION
+    let devtoolsOpen = false;
+    const detectDevTools = () => {
+        const threshold = 160;
+        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+        if ((widthThreshold || heightThreshold) && !devtoolsOpen) {
+            devtoolsOpen = true;
+            logCheating('DevTools', 'Attempted to open developer tools');
+        } else if (!widthThreshold && !heightThreshold) {
+            devtoolsOpen = false;
+        }
+    };
+    setInterval(detectDevTools, 1000);
+
+    // 4. KEYBOARD SHORTCUTS BLOCK
+    document.addEventListener('keydown', (e) => {
+        const blocked = [
+            e.key === 'PrintScreen',
+            e.key === 'F12',
+            e.key === 'F11',
+            e.ctrlKey && ['c', 'v', 'x', 'a', 'u', 'p', 's'].includes(e.key.toLowerCase()),
+            e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase()),
+            e.altKey && e.key === 'Tab',
+            e.metaKey // Block Windows/Cmd key
+        ];
+
+        if (blocked.some(Boolean)) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    });
+
+    // 5. RIGHT-CLICK BLOCK
     document.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         return false;
     });
 
-    // 4. Disable Copy, Cut, Paste
-    document.addEventListener('copy', (e) => {
+    // 6. TEXT SELECTION DISABLE
+    document.addEventListener('selectstart', (e) => {
+        if (window.testActive) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 7. DRAG PREVENTION
+    document.addEventListener('dragstart', (e) => {
         e.preventDefault();
         return false;
     });
 
-    document.addEventListener('cut', (e) => {
-        e.preventDefault();
-        return false;
-    });
-
-    document.addEventListener('paste', (e) => {
-        e.preventDefault();
-        return false;
-    });
-
-    // 5. Disable Screenshot Shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'PrintScreen') {
+    // 8. PRINT BLOCK
+    window.addEventListener('beforeprint', (e) => {
+        if (window.testActive) {
             e.preventDefault();
-            alert('⚠️ Screenshots are not allowed during the test!');
-            logCheating('Screenshot Attempt', 'Pressed PrintScreen key');
-            return false;
-        }
-
-        if (e.key === 's' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
-            e.preventDefault();
-            alert('⚠️ Screenshots are not allowed during the test!');
-            logCheating('Screenshot Attempt', 'Pressed Shift+Cmd/Ctrl+S');
-            return false;
-        }
-
-        if (e.ctrlKey && ['c', 'v', 'x', 'a'].includes(e.key.toLowerCase())) {
-            e.preventDefault();
-            return false;
-        }
-
-        if (e.key === 'F12') {
-            e.preventDefault();
-            return false;
-        }
-
-        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
-            e.preventDefault();
-            return false;
-        }
-
-        if (e.ctrlKey && e.key === 'u') {
-            e.preventDefault();
-            return false;
+            logCheating('Print Attempt', 'Tried to print the test');
         }
     });
 
-    // 6. Mobile Security: Blur on Inactive & Resize Detection
-    const blurOverlay = document.createElement('div');
-    blurOverlay.id = 'blurOverlay';
-    blurOverlay.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center; text-align: center; padding: 2rem;';
-    blurOverlay.innerHTML = `
-        <div>
-            <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
-            <h2 style="color: #dc2626; margin-bottom: 1rem;">Security Violation!</h2>
-            <p style="color: #4b5563; font-size: 1.1rem; margin-bottom: 0.5rem;">You are not allowed to switch apps or use split-screen.</p>
-            <p style="color: #6b7280;">Please return to the test immediately.</p>
-        </div>
+    // 9. COPY/CUT/PASTE BLOCK
+    ['copy', 'cut', 'paste'].forEach(event => {
+        document.addEventListener(event, (e) => {
+            e.preventDefault();
+            return false;
+        });
+    });
+
+    // 10. CSS PROTECTION (disable inspect element styling)
+    const style = document.createElement('style');
+    style.textContent = `
+        * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        body { -webkit-touch-callout: none; }
     `;
-    document.body.appendChild(blurOverlay);
-
-    // Blur when window loses focus (e.g., notification shade, app switch)
-    window.addEventListener('blur', () => {
-        if (window.testActive) {
-            blurOverlay.style.display = 'flex';
-            logCheating('Focus Lost', 'Window lost focus (App switch/Notification)');
-        }
-    });
-
-    window.addEventListener('focus', () => {
-        if (window.testActive) {
-            blurOverlay.style.display = 'none';
-        }
-    });
-
-    // Detect Resize (Split Screen) - with delay to prevent false positives on fullscreen start
-    let lastWidth = window.innerWidth;
-    let lastHeight = window.innerHeight;
-    let resizeDetectionActive = false;
-
-    // Wait 5 seconds before activating resize detection (prevents false positive on fullscreen entry)
-    setTimeout(() => {
-        resizeDetectionActive = true;
-        lastWidth = window.innerWidth;
-        lastHeight = window.innerHeight;
-        console.log('Resize detection activated');
-    }, 5000);
-
-    window.addEventListener('resize', () => {
-        if (!window.testActive || !resizeDetectionActive) return;
-
-        const widthDiff = Math.abs(window.innerWidth - lastWidth);
-        const heightDiff = Math.abs(window.innerHeight - lastHeight);
-
-        // Ignore small changes (like address bar showing/hiding)
-        if (widthDiff > 50 || heightDiff > 150) {
-            logCheating('Window Resize', `Window resized: ${window.innerWidth}x${window.innerHeight} (Potential Split Screen)`);
-        }
-
-        lastWidth = window.innerWidth;
-        lastHeight = window.innerHeight;
-    });
-
-    // Prevent Touch Context Menu (Long Press)
-    window.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 1) {
-            // Prevent multi-touch gestures if needed, but mainly context menu
-            // e.preventDefault(); 
-        }
-    }, { passive: false });
-
-    window.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }, true);
+    document.head.appendChild(style);
 
     // ========== MAIN CODE ==========
 
@@ -407,10 +429,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     testForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // IMPORTANT: Disable cheating detection FIRST to prevent false positives
-        window.cheatingDetectionActive = false;
+        // Disable security monitoring
         window.testActive = false;
-        console.log('Test submitted - Security monitoring disabled');
+        console.log('[Security] ⛔ Monitoring DISABLED (test submitted)');
 
         if (!window.resultId) {
             alert('Error: Could not verify test session.');
