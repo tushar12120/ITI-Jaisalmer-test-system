@@ -687,7 +687,131 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const shuffledQuestions = shuffleArray(activeTest.questions);
+    window.shuffledQuestions = shuffledQuestions; // Store for later use
     testTitle.textContent = activeTest.name;
+
+    // ========== TIMER FUNCTIONALITY ==========
+    let timerInterval = null;
+
+    const createTimerDisplay = () => {
+        const timerDiv = document.createElement('div');
+        timerDiv.id = 'timerDisplay';
+        timerDiv.style.cssText = `
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        `;
+        timerDiv.innerHTML = `
+            <span style="font-size: 1.5rem;">⏱️</span>
+            <span id="timerText">--:--</span>
+        `;
+        document.body.appendChild(timerDiv);
+        return timerDiv;
+    };
+
+    const formatTime = (seconds) => {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        if (hrs > 0) {
+            return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const autoSubmitTest = async () => {
+        window.testActive = false;
+
+        // Show time's up overlay
+        const timeUpOverlay = document.createElement('div');
+        timeUpOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(102, 126, 234, 0.98);
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+        timeUpOverlay.innerHTML = `
+            <div style="background: white; padding: 3rem; border-radius: 20px; text-align: center; max-width: 500px;">
+                <div style="font-size: 5rem; margin-bottom: 1rem;">⏰</div>
+                <h2 style="color: #667eea; margin-bottom: 1rem; font-size: 2rem;">Time's Up!</h2>
+                <p style="font-size: 1.2rem; color: #495057; margin-bottom: 1rem;">
+                    Your test is being auto-submitted...
+                </p>
+                <p style="color: #6c757d;">Please wait...</p>
+            </div>
+        `;
+        document.body.appendChild(timeUpOverlay);
+
+        // Submit the test
+        setTimeout(() => {
+            document.getElementById('testForm')?.requestSubmit();
+        }, 2000);
+    };
+
+    const startTimer = () => {
+        if (!activeTest.timer_duration || !activeTest.timer_start) {
+            console.log('[Timer] No timer configured for this test');
+            return;
+        }
+
+        const timerDisplay = createTimerDisplay();
+        const timerText = document.getElementById('timerText');
+
+        const durationMs = activeTest.timer_duration * 60 * 1000;
+        const startTime = new Date(activeTest.timer_start).getTime();
+        const endTime = startTime + durationMs;
+
+        const updateTimer = () => {
+            const now = Date.now();
+            const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+
+            timerText.textContent = formatTime(remaining);
+
+            // Change color based on remaining time
+            if (remaining <= 60) {
+                // Last minute - red pulsing
+                timerDisplay.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                timerDisplay.style.animation = 'pulse 1s infinite';
+            } else if (remaining <= 300) {
+                // Last 5 minutes - orange
+                timerDisplay.style.background = 'linear-gradient(135deg, #fd7e14 0%, #dc3545 100%)';
+            } else if (remaining <= 600) {
+                // Last 10 minutes - yellow
+                timerDisplay.style.background = 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)';
+            }
+
+            // Time's up
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                autoSubmitTest();
+            }
+        };
+
+        // Update immediately and then every second
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+    };
+
+    // Start timer when test begins
+    startTimer();
 
     // Render questions
     shuffledQuestions.forEach((q, index) => {

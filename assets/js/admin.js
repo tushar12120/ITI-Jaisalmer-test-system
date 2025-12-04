@@ -175,26 +175,153 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Create Timer Selection Modal
+    const createTimerModal = () => {
+        const modal = document.createElement('div');
+        modal.id = 'timerModal';
+        modal.style.cssText = `
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        modal.innerHTML = `
+            <div style="
+                background: white;
+                padding: 2.5rem;
+                border-radius: 20px;
+                text-align: center;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            ">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">⏱️</div>
+                <h2 style="color: #667eea; margin-bottom: 0.5rem; font-size: 1.75rem;">Select Test Duration</h2>
+                <p style="color: #6c757d; margin-bottom: 2rem;">Choose how long students will have to complete the test</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                    <button class="timer-option-btn" data-minutes="30" style="
+                        padding: 1.5rem 1rem;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                    ">
+                        30 min
+                        <div style="font-size: 0.875rem; font-weight: 400; opacity: 0.8; margin-top: 0.25rem;">Quick Test</div>
+                    </button>
+                    
+                    <button class="timer-option-btn" data-minutes="60" style="
+                        padding: 1.5rem 1rem;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+                    ">
+                        60 min
+                        <div style="font-size: 0.875rem; font-weight: 400; opacity: 0.8; margin-top: 0.25rem;">Standard</div>
+                    </button>
+                    
+                    <button class="timer-option-btn" data-minutes="90" style="
+                        padding: 1.5rem 1rem;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+                    ">
+                        90 min
+                        <div style="font-size: 0.875rem; font-weight: 400; opacity: 0.8; margin-top: 0.25rem;">Extended</div>
+                    </button>
+                    
+                    <button class="timer-option-btn" data-minutes="120" style="
+                        padding: 1.5rem 1rem;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4);
+                    ">
+                        120 min
+                        <div style="font-size: 0.875rem; font-weight: 400; opacity: 0.8; margin-top: 0.25rem;">Full Exam</div>
+                    </button>
+                </div>
+                
+                <button id="cancelTimerBtn" style="
+                    padding: 0.75rem 2rem;
+                    font-size: 1rem;
+                    background: #e9ecef;
+                    color: #495057;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                ">Cancel</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        return modal;
+    };
+
+    const timerModal = createTimerModal();
+
+    // Cancel button
+    document.getElementById('cancelTimerBtn').addEventListener('click', () => {
+        timerModal.style.display = 'none';
+    });
+
+    // Timer option buttons
+    timerModal.querySelectorAll('.timer-option-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const minutes = parseInt(btn.getAttribute('data-minutes'));
+            timerModal.style.display = 'none';
+
+            const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+            await App.saveTest({
+                ...currentTest,
+                status: 'active',
+                is_active: true,
+                active_session_id: sessionId,
+                timer_duration: minutes,
+                timer_start: new Date().toISOString()
+            });
+
+            await App.setActiveTestId(currentTest.id);
+            updateStatusDisplay();
+            loadSavedTests();
+
+            alert(`✅ Test started with ${minutes} minute timer!`);
+        });
+    });
+
     startTestBtn.addEventListener('click', async () => {
         if (!currentTest.id) {
             alert('Please select a saved test first');
             return;
         }
-
-        // Generate a unique session ID
-        const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-
-        // Update test status to 'active' with new session ID
-        await App.saveTest({
-            ...currentTest,
-            status: 'active',
-            is_active: true,
-            active_session_id: sessionId
-        });
-
-        await App.setActiveTestId(currentTest.id);
-        updateStatusDisplay();
-        loadSavedTests();
+        timerModal.style.display = 'flex';
     });
 
     stopTestBtn.addEventListener('click', async () => {
