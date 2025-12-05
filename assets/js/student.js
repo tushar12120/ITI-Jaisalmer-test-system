@@ -591,6 +591,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // 10. MINI WINDOW / SPLIT SCREEN DETECTION (Mobile)
+    let initialWidth = window.innerWidth;
+    let initialHeight = window.innerHeight;
+    let resizeViolationTimeout = null;
+
+    window.addEventListener('resize', () => {
+        if (!window.testActive) return;
+
+        // Clear previous timeout to debounce
+        if (resizeViolationTimeout) clearTimeout(resizeViolationTimeout);
+
+        resizeViolationTimeout = setTimeout(() => {
+            const currentWidth = window.innerWidth;
+            const currentHeight = window.innerHeight;
+
+            // Check if window size reduced significantly (split screen / mini window)
+            const widthReduced = currentWidth < initialWidth * 0.8;
+            const heightReduced = currentHeight < initialHeight * 0.8;
+
+            // Also check screen vs window ratio (for mini window mode)
+            const screenWidth = screen.width;
+            const screenHeight = screen.height;
+            const widthRatio = currentWidth / screenWidth;
+            const heightRatio = currentHeight / screenHeight;
+
+            // If window is less than 70% of screen size, it's likely split screen
+            const isMiniWindow = widthRatio < 0.7 || heightRatio < 0.7;
+
+            if ((widthReduced || heightReduced || isMiniWindow) && window.testActive) {
+                console.log('[Security] Mini window/split screen detected:', {
+                    currentWidth, currentHeight,
+                    initialWidth, initialHeight,
+                    widthRatio, heightRatio
+                });
+
+                violationModal.style.display = 'flex';
+                document.getElementById('violationCount').textContent = window.cheatingAttempts + 1;
+                logViolation('Split Screen', 'Mini window or split screen mode detected');
+                checkMaxViolations();
+
+                // Try to go fullscreen again
+                requestFullScreen().catch(() => { });
+            }
+        }, 500); // Debounce 500ms
+    });
+
     // Return to Fullscreen Button
     document.getElementById('returnFullscreenBtn').addEventListener('click', async () => {
         violationModal.style.display = 'none';

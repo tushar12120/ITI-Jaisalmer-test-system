@@ -694,6 +694,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td>${count} Students</td>
                     <td>
                         <button class="btn btn-secondary btn-sm view-results-btn" data-test-id="${test.id}" data-session-id="${session.sessionId}">View Results</button>
+                        <button class="btn btn-sm delete-session-btn" data-test-id="${test.id}" data-session-id="${session.sessionId}" data-test-name="${test.name}" data-count="${count}" style="background: #dc3545; color: white; margin-left: 0.5rem;">🗑️ Delete</button>
                     </td>
                 `;
                 historyTestsListBody.appendChild(tr);
@@ -715,6 +716,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
 
                     openHistoryModal(test, sessionResults, sessionId);
+                });
+            });
+
+            // Add Event Listeners to delete session buttons
+            document.querySelectorAll('.delete-session-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const testId = e.target.getAttribute('data-test-id');
+                    const sessionId = e.target.getAttribute('data-session-id');
+                    const testName = e.target.getAttribute('data-test-name');
+                    const count = e.target.getAttribute('data-count');
+
+                    const confirmed = window.confirm(
+                        `⚠️ DELETE ALL RESULTS?\n\n` +
+                        `Test: ${testName}\n` +
+                        `Results: ${count} students\n\n` +
+                        `This action CANNOT be undone!\n` +
+                        `All student results will be permanently deleted from database.\n\n` +
+                        `Are you sure?`
+                    );
+
+                    if (confirmed) {
+                        try {
+                            await App.deleteSessionResults(testId, sessionId);
+                            alert('✅ Results deleted successfully!');
+                            loadHistoryData(); // Reload the history
+                        } catch (error) {
+                            alert('❌ Error deleting results: ' + error.message);
+                        }
+                    }
                 });
             });
         }

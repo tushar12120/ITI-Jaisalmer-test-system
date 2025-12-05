@@ -121,6 +121,67 @@ const App = {
         return data || [];
     },
 
+    // Delete a single result by ID
+    deleteResult: async (id) => {
+        console.log('Deleting result with ID:', id);
+        const { data, error } = await supabase
+            .from('results')
+            .delete()
+            .eq('id', id)
+            .select();
+
+        if (error) {
+            console.error('Error deleting result:', error);
+            throw error;
+        }
+        console.log('Deleted result:', data);
+        return true;
+    },
+
+    // Delete all results for a specific test session
+    deleteSessionResults: async (testId, sessionId) => {
+        console.log('Deleting session results:', { testId, sessionId });
+
+        // First find the results to delete
+        let selectQuery = supabase.from('results').select('id').eq('test_id', testId);
+
+        if (sessionId === 'legacy') {
+            selectQuery = selectQuery.is('session_id', null);
+        } else {
+            selectQuery = selectQuery.eq('session_id', sessionId);
+        }
+
+        const { data: resultsToDelete, error: selectError } = await selectQuery;
+
+        if (selectError) {
+            console.error('Error finding results to delete:', selectError);
+            throw selectError;
+        }
+
+        console.log('Found results to delete:', resultsToDelete);
+
+        if (!resultsToDelete || resultsToDelete.length === 0) {
+            console.log('No results found to delete');
+            return true;
+        }
+
+        // Delete using the IDs
+        const ids = resultsToDelete.map(r => r.id);
+        const { data, error } = await supabase
+            .from('results')
+            .delete()
+            .in('id', ids)
+            .select();
+
+        if (error) {
+            console.error('Error deleting results:', error);
+            throw error;
+        }
+
+        console.log('Successfully deleted results:', data);
+        return true;
+    },
+
     // Student Management
     getStudents: async () => {
         const { data, error } = await supabase
