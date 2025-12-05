@@ -615,6 +615,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // 11. WINDOW BLUR DETECTION - Catches mini window/PiP touch
+    // When student touches floating mini window, our window loses focus
+    window.addEventListener('blur', () => {
+        if (window.testActive) {
+            console.log('[Security] Window blur detected - possible mini window interaction');
+            violationModal.style.display = 'flex';
+            document.getElementById('violationCount').textContent = window.cheatingAttempts + 1;
+            logViolation('Window Blur', 'Window lost focus - possible mini window or overlay interaction');
+            checkMaxViolations();
+
+            // Auto-focus back
+            setTimeout(() => {
+                window.focus();
+            }, 500);
+        }
+    });
+
     // 10. MINI WINDOW / SPLIT SCREEN DETECTION (Mobile)
     let initialWidth = window.innerWidth;
     let initialHeight = window.innerHeight;
