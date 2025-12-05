@@ -408,15 +408,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Start Test Button Handler
     document.getElementById('startTestBtn').addEventListener('click', async () => {
+        // CHECK FOR PRE-SETUP MINI WINDOW/SPLIT SCREEN
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+
+        // Window should be at least 85% of screen size
+        const widthRatio = windowWidth / screenWidth;
+        const heightRatio = windowHeight / screenHeight;
+
+        console.log('[Security] Screen check:', {
+            windowWidth, windowHeight,
+            screenWidth, screenHeight,
+            widthRatio, heightRatio
+        });
+
+        // If window is too small (split screen or mini window already active)
+        if (widthRatio < 0.85 || heightRatio < 0.85) {
+            alert('⚠️ कृपया सभी मिनी विंडो/स्प्लिट स्क्रीन बंद करें!\n\n⚠️ Please close all mini windows/split screens!\n\nYour screen must be in full mode to start the test.');
+            return; // Don't start test
+        }
+
         try {
             await requestFullScreen();
             startOverlay.style.display = 'none';
             if (testContent) testContent.style.display = 'flex';
 
-            // Activate security after small delay
+            // Capture initial dimensions AFTER fullscreen
             setTimeout(() => {
+                initialWidth = window.innerWidth;
+                initialHeight = window.innerHeight;
                 window.testActive = true;
-                console.log('[Security] ✅ Full-screen mode active');
+                console.log('[Security] ✅ Full-screen mode active. Initial size:', initialWidth, 'x', initialHeight);
             }, 1000);
         } catch (err) {
             alert('⚠️ Please allow full-screen mode to start the test');
